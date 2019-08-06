@@ -10,5 +10,6 @@ My implementation of the Poincaré disk MDS algorithm discussed by A. Cvetkovski
 
 # K-Means Clustering in the Hyperboloid Model
 Primarily following the optimization and Frechet mean approach outlined by Wilson, Benjamin R. and Matthias Leimeister. “Gradient descent in hyperbolic space.” (2018).
+
 ![poincare_kmeans](https://user-images.githubusercontent.com/16658498/62563652-11aa2f00-b849-11e9-93e5-4665f9020052.png)
 
