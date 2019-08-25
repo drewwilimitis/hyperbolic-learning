@@ -11,7 +11,7 @@ My implementation of the Poincaré disk MDS algorithm discussed by A. Cvetkovski
 # K-Means Clustering in the Hyperboloid Model
 A modified version of the Hyperbolic KMeans algorithm recently presented in "Learning graph-structured data using Poincaré embeddings and Riemannian K-means algorithms". Hatem Hajri, Hadi Zaatiti, Georges Hebrail. https://arxiv.org/abs/1907.01662. (2019)
 
-
+![ncaa_kmeans](https://user-images.githubusercontent.com/16658498/63655488-22fea100-c74e-11e9-85f9-1bed1a060172.png)
 
 Primarily following the optimization and Frechet mean approach outlined by Wilson, Benjamin R. and Matthias Leimeister. “Gradient descent in hyperbolic space.” (2018).
 
