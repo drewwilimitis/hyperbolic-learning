@@ -20,7 +20,7 @@ Primarily following the optimization and Frechet mean approach outlined by Wilso
 # Embedding Graphs in Lorentzian Spacetime
 Implementing the DAG spacetime embedding algorithm published in **[1]** Clough JR, Evans TS (2017) Embedding graphs in Lorentzian spacetime. PLoS ONE 12(11):e0187301. https://doi.org/10.1371/journal.pone.0187301.
 
-![hep-th_citation_network]https://user-images.githubusercontent.com/16658498/65956193-6fa16000-e40f-11e9-935b-a518a77b6525.png
+![hep-th_citation_network](https://user-images.githubusercontent.com/16658498/65956193-6fa16000-e40f-11e9-935b-a518a77b6525.png)
 
 # Hyperbolic Support Vector Machine
 Python implementation of "Large-margin classification in hyperbolic space". Cho, H., Demeo, B., Peng, J., Berger, B. CoRR abs/1806.00437 (2018)
