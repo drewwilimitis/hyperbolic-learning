@@ -14,3 +14,4 @@ data/mathematics_closure.csv
 data/noun_closure.csv
 data/science_closure.csv
 hyperbolic_kmeans/enron/emails.csv
+*.ini
