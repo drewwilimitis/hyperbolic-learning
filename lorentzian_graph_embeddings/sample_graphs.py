@@ -60,3 +60,11 @@ def causal_set_graph(n, d=2):
                 else:
                     G.add_edge(j, i)
     return G
+
+def random_dag(n, p=0.1):
+    if p < 0 or p > 1:
+        print('Error: probability param not in [0,1])
+        return
+    G = nx.erdos_renyi_graph(n, p=p, seed=None, directed=True)
+    return G
+
