@@ -1,5 +1,6 @@
 # Hyperbolic Learning
 
+![IllinformedHalfAnemone-size_restricted](https://user-images.githubusercontent.com/16658498/67390992-564d8880-f563-11e9-95af-a959085e72c1.gif)
 
 ## Poincaré Embeddings
 Implementing hyperbolic embeddings outlined by Nickel and Kiela from Facebook AI Research in "Poincaré embeddings for learning hierarchical representations" (2017)  https://arxiv.org/pdf/1705.08039.pdf
