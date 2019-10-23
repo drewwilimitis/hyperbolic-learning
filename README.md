@@ -1,4 +1,8 @@
-# Hyperbolic Learning
+# hyperbolic-learning
+
+**It has been recently established that many real-world networks have a latent geometric structure that resembles negatively curved hyperbolic spaces. Therefore, complex networks can be more accurately represented by embedding graphs in hyperbolic geometry, rather than flat Euclidean space.**
+
+**The goal of this project is to provide Python implementations of a few recently published algorithms that leverage hyperbolic geometry for machine learning and network analysis. Several examples are given with real-world datasets, however; the time complexity is far from optimized and this repository is primarily for research purposes - specifically investigating how to integrate downstream supervised learning methods with hyperbolic embeddings.**
 
 ![IllinformedHalfAnemone-size_restricted](https://user-images.githubusercontent.com/16658498/67390992-564d8880-f563-11e9-95af-a959085e72c1.gif)
 
