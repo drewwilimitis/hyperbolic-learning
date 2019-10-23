@@ -10,16 +10,32 @@
 ------
 
 ### Models:
-* __Poincaré Embeddings__ - Implementing hyperbolic embeddings outlined by Nickel and Kiela from Facebook AI Research in "Poincaré embeddings for learning hierarchical representations" (2017)  https://arxiv.org/pdf/1705.08039.pdf. Mostly exploratory rather than operational, especially given an available implementation in the `gensim` library and a PyTorch implementation released by the authors at https://github.com/facebookresearch/poincare-embeddings.
+* __Poincaré Embeddings__ - Implementing poincare embeddings outlined in [1]. Mostly exploratory rather than operational, especially given an implementation in the `gensim` library and a PyTorch version released by the authors [here](https://github.com/facebookresearch/poincare-embeddings).
 
-* __Hyperbolic Multidimensional Scaling__ - My implementation of the Poincaré disk MDS algorithm discussed by A. Cvetkovski and M. Crovella in "Multidimensional scaling in the Poincaré disk." arXiv:1105.5332, 2011
+* __Hyperbolic Multidimensional Scaling__ - My implementation of a Poincaré disk MDS algorithm [2], which takes an input dissimilarity matrix and uses a simple line search with gradient descent to find embedding coordinates in the Poincaré disk with pairwise hyperbolic distances that preserve the input dissimilarities.  
 
-* __K-Means Clustering in the Hyperboloid Model__ - A modified version of the Hyperbolic KMeans algorithm recently presented in "Learning graph-structured data using Poincaré embeddings and Riemannian K-means algorithms". Hatem Hajri, Hadi Zaatiti, Georges Hebrail (2019) https://arxiv.org/abs/1907.01662. Primarily following the optimization and Frechet mean approach outlined by Wilson, Benjamin R. and Matthias Leimeister. “Gradient descent in hyperbolic space.” (2018).
+* __K-Means Clustering in the Hyperboloid Model__ - A modified version of the Hyperbolic KMeans algorithm recently published in [3]. Primarily follows an optimization approach using Frechet means to adapt the notion of a centroid or center of mass to hyperbolic geometry [4].
 
-* __Hyperbolic Support Vector Machine__ - Python implementation of "Large-margin classification in hyperbolic space". Cho, H., Demeo, B., Peng, J., Berger, B. CoRR abs/1806.00437 (2018).
+* __Hyperbolic Support Vector Machine__ - Linear hyperbolic SVC based on formulating the max-margin optimization problem in hyperbolic geometry with a projected gradient descent [5]. Uses transitions between poincare disk and hyperboloid model with a decision boundary classification rule to perform supervised learning in hyperbolic space.
 
-* __Embedding Graphs in Lorentzian Spacetime__ - Implementing the DAG spacetime embedding algorithm published by Clough JR, Evans TS (2017) Embedding graphs in Lorentzian spacetime. PLoS ONE 12(11):e0187301. https://doi.org/10.1371/journal.pone.0187301.
+* __Embedding Graphs in Lorentzian Spacetime__ -  An algorithm based on notions of causality in the Minkowski spacetime formulation of special relativity, used to embed directed acyclic graphs (DAGs) such that nodes are represented by both space-like and time-like coordinates [6]. 
+
+### Data:
 
 ![hep-th_citation_network](https://user-images.githubusercontent.com/16658498/65956193-6fa16000-e40f-11e9-935b-a518a77b6525.png)
 
 ![poincare_kmeans](https://user-images.githubusercontent.com/16658498/62563652-11aa2f00-b849-11e9-93e5-4665f9020052.png)
+
+## References
+-----
+[1] Nickel, Kiela. "Poincaré embeddings for learning hierarchical representations" (2017). [arXiv](https://arxiv.org/pdf/1705.08039.pdf).
+
+[2] A. Cvetkovski and M. Crovella. Multidimensional scaling in the Poincaré disk. arXiv:1105.5332, 2011.
+
+[3] "Learning graph-structured data using Poincaré embeddings and Riemannian K-means algorithms". Hatem Hajri, Hadi Zaatiti, Georges Hebrail (2019) [arXiv](https://arxiv.org/abs/1907.01662).
+
+[4] Wilson, Benjamin R. and Matthias Leimeister. “Gradient descent in hyperbolic space.” (2018).
+
+[5] "Large-margin classification in hyperbolic space". Cho, H., Demeo, B., Peng, J., Berger, B. CoRR abs/1806.00437 (2018).
+
+[6] Clough JR, Evans TS (2017) Embedding graphs in Lorentzian spacetime. PLoS ONE 12(11):e0187301. https://doi.org/10.1371/journal.pone.0187301.
