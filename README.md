@@ -41,7 +41,7 @@
 - Synthetic generated data (sklearn.make_datasets, networkx.generators, etc.)
 
 ## Dependencies
-- Models are designed based on the sklearn estimator API (`sklearn ` generally used only in rare, non-essential cases)
+- Models are designed based on the sklearn estimator API (`sklearn` generally used only in rare, non-essential cases)
 - `Networkx` is used to generate & display graphs
 
 ## References
