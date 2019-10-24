@@ -9,22 +9,32 @@
 ## Contents
 ------
 
-### Models:
-* __Poincaré Embeddings__ - Implementing poincare embeddings outlined in [1]. Mostly exploratory rather than operational, especially given an implementation in the `gensim` library and a PyTorch version released by the authors [here](https://github.com/facebookresearch/poincare-embeddings).
+### Models
+* __Poincaré Embeddings__: 
+  - Mostly an exploration of the hyperbolic embedding approach used in __[1]__.
+  - Available implementation in the `gensim` library and a PyTorch version released by the authors [here](https://github.com/facebookresearch/poincare-embeddings).
 
-* __Hyperbolic Multidimensional Scaling__ - My implementation of a Poincaré disk MDS algorithm [2], which takes an input dissimilarity matrix and uses a simple line search with gradient descent to find embedding coordinates in the Poincaré disk with pairwise hyperbolic distances that preserve the input dissimilarities.  
+* __Hyperbolic Multidimensional Scaling__:
+  - Given an input dissimilarity matrix, solves optimization problem to find embedding coordinates in the Poincaré disk with pairwise hyperbolic distances that preserve the input dissimilarities __[2]__.  
 
-* __K-Means Clustering in the Hyperboloid Model__ - A modified version of the Hyperbolic KMeans algorithm recently published in [3]. Primarily follows an optimization approach using Frechet means to adapt the notion of a centroid or center of mass to hyperbolic geometry [4].
+* __K-Means Clustering in the Hyperboloid Model__ - 
+  - Optimization approach using Frechet means to adapt the notion of a centroid or center of mass to hyperbolic geometry __[3, 4]__.
 
-* __Hyperbolic Support Vector Machine__ - Linear hyperbolic SVC based on formulating the max-margin optimization problem in hyperbolic geometry with a projected gradient descent [5]. Uses transitions between poincare disk and hyperboloid model with a decision boundary classification rule to perform supervised learning in hyperbolic space.
+* __Hyperbolic Support Vector Machine__ - 
+  - Linear hyperbolic SVC based on formulating the max-margin optimization problem in hyperbolic geometry __[5]__.
+  - Uses projected gradient descent to define optimal decision boundary to perform supervised learning in hyperbolic space.
 
-* __Embedding Graphs in Lorentzian Spacetime__ -  An algorithm based on notions of causality in the Minkowski spacetime formulation of special relativity, used to embed directed acyclic graphs (DAGs) such that nodes are represented by both space-like and time-like coordinates [6]. 
+* __Embedding Graphs in Lorentzian Spacetime__ -  
+  - An algorithm based on notions of causality in the Minkowski spacetime formulation of special relativity __[6]__.
+  - Used to embed directed acyclic graphs (DAGs) such that nodes are represented by space-like and time-like coordinates. 
 
-### Data:
 
 ![hep-th_citation_network](https://user-images.githubusercontent.com/16658498/65956193-6fa16000-e40f-11e9-935b-a518a77b6525.png)
 
 ![poincare_kmeans](https://user-images.githubusercontent.com/16658498/62563652-11aa2f00-b849-11e9-93e5-4665f9020052.png)
+
+### Data:
+
 
 ## References
 -----
