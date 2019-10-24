@@ -8,7 +8,6 @@
 ![IllinformedHalfAnemone-size_restricted](https://user-images.githubusercontent.com/16658498/67390992-564d8880-f563-11e9-95af-a959085e72c1.gif)
 
 # Contents
-------
 
 ## Models
 * __Poincaré Embeddings__: 
@@ -33,8 +32,6 @@
 
 ![poincare_kmeans](https://user-images.githubusercontent.com/16658498/62563652-11aa2f00-b849-11e9-93e5-4665f9020052.png)
 
-------
-
 ## Datasets
 - Zachary Karate Club Network
 - WordNet
@@ -43,17 +40,12 @@
 - arXiv Citation Network
 - Synthetic generated data (sklearn.make_datasets, networkx.generators, etc.)
 
-------
-
 ## Dependencies
 - Models are designed based on the sklearn estimator API (`sklearn ` generally used only in rare, non-essential cases)
 - `Networkx` is used to generate & display graphs
 
-------
-
 ## References
 
------
 __[1]__ Nickel, Kiela. "Poincaré embeddings for learning hierarchical representations" (2017). [arXiv](https://arxiv.org/pdf/1705.08039.pdf).
 
 __[2]__ A. Cvetkovski and M. Crovella. Multidimensional scaling in the Poincaré disk. arXiv:1105.5332, 2011.
