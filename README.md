@@ -1,4 +1,4 @@
-# hyperbolic-learning
+﻿# hyperbolic-learning
 
 **It has been recently established that many real-world networks have a latent geometric structure that resembles negatively curved hyperbolic spaces. Therefore, complex networks, and particularly the hierarchical relationships often found within, can often be more accurately represented by embedding graphs in hyperbolic geometry, rather than flat Euclidean space.**
 

@@ -13,6 +13,7 @@ data/mammals_sample.tsv
 data/mathematics_closure.csv
 data/noun_closure.csv
 data/science_closure.csv
+/data/network_datasets/
 hyperbolic_kmeans/enron/emails.csv
 *.ini
 *.bz2
