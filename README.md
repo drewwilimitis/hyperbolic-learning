@@ -15,14 +15,14 @@
   - Available implementation in the `gensim` library and a PyTorch version released by the authors [here](https://github.com/facebookresearch/poincare-embeddings).
   
 * __Hyperbolic Multidimensional Scaling__:
-  - Solves for embedding coordinates in Poincaré disk with hyperbolic distances that preserve input dissimilarities __[2]__.
+  - Finds embedding in Poincaré disk with hyperbolic distances that preserve input dissimilarities __[2]__.
   
 * __K-Means Clustering in the Hyperboloid Model__:
   - Optimization approach using Frechet means to define a centroid/center of mass in hyperbolic space __[3, 4]__.
   
 * __Hyperbolic Support Vector Machine__ - 
-  - Linear hyperbolic SVC based on formulating the max-margin optimization problem in hyperbolic geometry __[5]__.
-  - Uses projected gradient descent to define optimal decision boundary to perform supervised learning in hyperbolic space.
+  - Linear hyperbolic SVC based on the max-margin optimization problem in hyperbolic geometry __[5]__.
+  - Uses projected gradient descent to define decision boundary and predict classifications.
   
 * __Embedding Graphs in Lorentzian Spacetime__ -  
   - An algorithm based on notions of causality in the Minkowski spacetime formulation of special relativity __[6]__.
