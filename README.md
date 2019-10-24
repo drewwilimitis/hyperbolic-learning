@@ -9,7 +9,7 @@
 ## Contents
 ------
 
-### Models
+## Models
 * __Poincaré Embeddings__: 
   - Mostly an exploration of the hyperbolic embedding approach used in __[1]__.
   - Available implementation in the `gensim` library and a PyTorch version released by the authors [here](https://github.com/facebookresearch/poincare-embeddings).
@@ -28,24 +28,32 @@
   - An algorithm based on notions of causality in the Minkowski spacetime formulation of special relativity __[6]__.
   - Used to embed directed acyclic graphs (DAGs) such that nodes are represented by space-like and time-like coordinates. 
 
-
 ![hep-th_citation_network](https://user-images.githubusercontent.com/16658498/65956193-6fa16000-e40f-11e9-935b-a518a77b6525.png)
 
 ![poincare_kmeans](https://user-images.githubusercontent.com/16658498/62563652-11aa2f00-b849-11e9-93e5-4665f9020052.png)
 
-### Data:
+## Datasets
+- Zachary Karate Club Network
+- WordNet
+- Enron Email Corpus
+- Polbooks Network
+- arXiv Citation Network
+- Synthetic generated data (sklearn.make_datasets, networkx.generators, etc.)
 
+## Dependencies
+- Models are designed based on the sklearn estimator API (`sklearn ` generally used only in rare, non-essential cases)
+- `Networkx` is used to generate & display graphs
 
 ## References
 -----
-[1] Nickel, Kiela. "Poincaré embeddings for learning hierarchical representations" (2017). [arXiv](https://arxiv.org/pdf/1705.08039.pdf).
+__[1]__ Nickel, Kiela. "Poincaré embeddings for learning hierarchical representations" (2017). [arXiv](https://arxiv.org/pdf/1705.08039.pdf).
 
-[2] A. Cvetkovski and M. Crovella. Multidimensional scaling in the Poincaré disk. arXiv:1105.5332, 2011.
+__[2]__ A. Cvetkovski and M. Crovella. Multidimensional scaling in the Poincaré disk. arXiv:1105.5332, 2011.
 
-[3] "Learning graph-structured data using Poincaré embeddings and Riemannian K-means algorithms". Hatem Hajri, Hadi Zaatiti, Georges Hebrail (2019) [arXiv](https://arxiv.org/abs/1907.01662).
+__[3]__ "Learning graph-structured data using Poincaré embeddings and Riemannian K-means algorithms". Hatem Hajri, Hadi Zaatiti, Georges Hebrail (2019) [arXiv](https://arxiv.org/abs/1907.01662).
 
-[4] Wilson, Benjamin R. and Matthias Leimeister. “Gradient descent in hyperbolic space.” (2018).
+__[4]__ Wilson, Benjamin R. and Matthias Leimeister. “Gradient descent in hyperbolic space.” (2018).
 
-[5] "Large-margin classification in hyperbolic space". Cho, H., Demeo, B., Peng, J., Berger, B. CoRR abs/1806.00437 (2018).
+__[5]__ "Large-margin classification in hyperbolic space". Cho, H., Demeo, B., Peng, J., Berger, B. CoRR abs/1806.00437 (2018).
 
-[6] Clough JR, Evans TS (2017) Embedding graphs in Lorentzian spacetime. PLoS ONE 12(11):e0187301. https://doi.org/10.1371/journal.pone.0187301.
+__[6]__ Clough JR, Evans TS (2017) Embedding graphs in Lorentzian spacetime. PLoS ONE 12(11):e0187301. https://doi.org/10.1371/journal.pone.0187301.
