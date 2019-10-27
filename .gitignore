@@ -17,3 +17,4 @@ data/science_closure.csv
 hyperbolic_kmeans/enron/emails.csv
 *.ini
 *.bz2
+*.pyc

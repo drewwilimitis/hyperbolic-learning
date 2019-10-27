@@ -1,13 +1,14 @@
 # import libraries
 import numpy as np
+import matplotlib.pyplot as plt
 import sys
 my_path = 'C:\\Users\\dreww\\Desktop\\hyperbolic-learning' # path to utils.py 
 sys.path.append(my_path)
 from utils import *
 
-################################################
-# Frechet Mean Optimization in Hyperboloid Model
-################################################
+#----------------------------------------------------------
+#----- Frechet Mean Optimization in Hyperboloid Model -----
+#----------------------------------------------------------
 
 def exp_map(v, theta, eps=1e-6):
     # v: tangent vector in minkowski space
@@ -64,9 +65,9 @@ def compute_mean(theta, X, num_rounds = 10, alpha=0.3, tol = 1e-4, verbose=False
             print('\n')
     return centr_pt
 
-#####################################
-# Hyperbolic K-Means Clustering Model
-#####################################
+#-----------------------------------------------
+#----- Hyperbolic K-Means Clustering Model -----
+#-----------------------------------------------
 
 class HyperbolicKMeans():
     """
@@ -95,13 +96,17 @@ class HyperbolicKMeans():
         centers = np.hstack((x.reshape(-1,1), y.reshape(-1,1)))
         self.centroids = centers
         
-    def init_assign(self):
+    def init_assign(self, labels=None):
         # cluster assignments as indicator matrix
         assignments = np.zeros((self.n_samples, self.n_clusters))
         for i in range(self.n_samples):
-            # randomly initialize each binary vector
-            j = np.random.randint(0, self.n_clusters)
-            assignments[i][j] = 1
+            if labels is not None:
+                # assign to classes with ground truth input labels
+                assignments[i][labels[i]] = 1
+            else:
+                # randomly initialize each binary vector
+                j = np.random.randint(0, self.n_clusters)
+                assignments[i][j] = 1
         self.assignments = assignments
         
     def update_centroids(self, X):
@@ -134,17 +139,7 @@ class HyperbolicKMeans():
             var_C.append(np.mean(np.array([poincare_dist(self.centroids[i], x) for x in X])))
         self.variances = np.sort(var_C)[-2]
     
-    def fit(self, X):
-        """
-        Apply K means algorithm in the Poincaré disk for input data X
-        Parameters
-        ----------
-        X : array, shape (n_samples, n_features)
-        """
-        self.fit_predict(X)
-        return self
-
-    def fit_predict(self, X, max_epochs=40, verbose=False):
+    def fit(self, X, y=None, max_epochs=40, verbose=False):
         """
         Fit the K centroids from X, and return the class assignments by nearest centroid
         Parameters
@@ -155,13 +150,19 @@ class HyperbolicKMeans():
         """
         
         # make sure X within poincaré ball
+        #X = Normalizer().fit_transform(X)
         if (norm(X, axis=1) > 1).any():
             X = X / (np.max(norm(X, axis=1)))
         
         # initialize random centroids and assignments
         self.n_samples = X.shape[0]
         self.init_centroids()
-        self.init_assign()
+        
+        if y is not None:
+            self.init_assign(y)
+            self.update_centroids(X)
+        else:
+            self.init_assign()
         
         # loop through the assignment and update steps
         for j in range(max_epochs):
@@ -180,7 +181,7 @@ class HyperbolicKMeans():
                 print(self.centroids)
         self.labels = np.argmax(self.assignments, axis=1)
         self.cluster_var(X)
-        return self.assignments
+        return
     
     def predict(self, X):
         """
@@ -199,3 +200,63 @@ class HyperbolicKMeans():
             cx = np.argmin(centroid_distances)
             labels[i][cx] = 1
         return labels
+    
+#------------------------------------------
+#----- Visualization helper functions -----
+#------------------------------------------
+
+def dist_squared(x, y, axis=None):
+    return np.sum((x - y)**2, axis=axis)
+
+# plot clustering results in poincare disk
+def plot_clusters(emb, labels, centroids, edge_list, title=None, height=8, width=8,
+                  add_labels=False, label_dict=None, plot_frac=1, edge_frac=1, label_frac=0.001):
+    # Note: parameter 'emb' expects data frame with node ids and coords
+    emb.columns = ['node', 'x', 'y']
+    n_clusters = len(centroids)
+    plt.figure(figsize=(width,height))
+    plt.xlim([-1.0,1.0])
+    plt.ylim([-1.0,1.0])
+    # set colormap
+    if n_clusters <= 12:
+        colors = ['b', 'r', 'g', 'y', 'm', 'c', 'k', 'silver', 'lime', 'skyblue', 'maroon', 'darkorange']
+    elif 10 < n_clusters <= 20:
+        colors = [i for i in plt.cm.get_cmap('tab20').colors]
+    else:
+        cmap = plt.cm.get_cmap(name='viridis')
+        colors = cmap(np.linspace(0, 1, n_clusters))
+    # get embedding coordinates
+    emb_data = np.array(emb.iloc[:, 1:3])
+    for i in range(n_clusters):
+        plt.scatter(emb_data[(labels[:, i] == 1), 0], emb_data[(labels[:, i] == 1), 1],
+                             color = colors[i], alpha=0.8, edgecolors='w', linewidth=2, s=250)
+        plt.scatter(centroids[i, 0], centroids[i, 1], s=750, color = colors[i],
+                    edgecolor='black', linewidth=2, marker='*');
+    for i in range(int(len(edge_list) * edge_frac)):
+        x1 = emb.loc[(emb.iloc[:, 0] == edge_list[i][0]), ['x', 'y']].values[0]
+        x2 = emb.loc[(emb.node == edge_list[i][1]), ['x', 'y']].values[0]
+        _ = plt.plot([x1[0], x2[0]], [x1[1], x2[1]], '--', c='black', linewidth=1, alpha=0.35)
+    ax = plt.gca()
+    circ = plt.Circle((0, 0), radius=1, edgecolor='black', facecolor='None', linewidth=3, alpha=0.5)
+    ax.add_patch(circ)
+    
+    # add labels to embeddings
+    if add_labels and label_dict != None:
+        plt.grid('off')
+        plt.axis('off')
+        embed_vals = np.array(list(label_dict.values()))
+        keys = list(label_dict.keys())
+        min_dist_2 = label_frac * max(embed_vals.max(axis=0) - embed_vals.min(axis=0)) ** 2
+        labeled_vals = np.array([2*embed_vals.max(axis=0)])
+        n = int(plot_frac*len(embed_vals))
+        for i in np.random.permutation(len(embed_vals))[:n]:
+            if np.min(dist_squared(embed_vals[i], labeled_vals, axis=1)) < min_dist_2:
+                continue
+            else:
+                props = dict(boxstyle='round', lw=2, edgecolor='black', alpha=0.35)
+                _ = ax.text(embed_vals[i][0], embed_vals[i][1]+0.02, s=keys[i].split('.')[0],
+                            size=10, fontsize=12, verticalalignment='top', bbox=props)
+                labeled_vals = np.vstack((labeled_vals, embed_vals[i]))
+    if title != None:
+        plt.suptitle('Hyperbolic K-Means - ' + title, size=16);
+    plt.show();        
