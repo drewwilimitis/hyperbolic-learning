@@ -246,14 +246,8 @@ class HyperMDS():
             self.dissimilarity_matrix = pd_matrix(X)
         self.n = self.dissimilarity_matrix.shape[0]
         
-        # use pca as initial config
-        if init == 'pca':
-            pca = PCA(n_components=2)
-            X_proj = pca.fit_transform(X)
-            X_proj = X_proj / norm(X_proj)
-            self.embedding = X_proj
-        else:
-            self.init_embed(low=init_low, high=init_high)
+        # set initial config
+        self.init_embed(low=init_low, high=init_high)
         
         # set a max distance window for embedding
         smax = smax
@@ -294,3 +288,30 @@ class HyperMDS():
         final_emb = self.embedding.reshape(-1,1)
         self.embedding = np.hstack((np.real(final_emb), np.imag(final_emb)))
         return self.embedding
+    
+#----------------------------------------
+#----- EVALUATION UTILITY FUNCTIONS -----
+#----------------------------------------
+        
+# compute poincaré distance matrix
+def pd_matrix(embedding):
+    n = embedding.shape[0]
+    dist_matrix = np.zeros((n, n))
+    for i in range(n):
+        for j in range(i+1, n):
+            dist_matrix[i][j] = poincare_dist(embedding[i], embedding[j])
+    return dist_matrix
+
+# compute Sammon stress of the embedding
+def sammon_stress(embedding, dissimilarity_matrix, alpha=1):
+    stress = 0
+    scale = 0
+    n = embedding.shape[0]
+    for i in range(n):
+        for j in range(i+1, n):
+            if dissimilarity_matrix[i][j] != 0:
+                delta_ij = alpha * dissimilarity_matrix[i][j]
+                d_ij = poincare_dist(embedding[i], embedding[j])
+                scale += delta_ij
+                stress += (d_ij - delta_ij)**2 / delta_ij
+    return stress/scale
