@@ -14,7 +14,9 @@ data/mathematics_closure.csv
 data/noun_closure.csv
 data/science_closure.csv
 /data/network_datasets/
+*__pycache__*
 hyperbolic_kmeans/enron/emails.csv
+
 *.ini
 *.bz2
 *.pyc
