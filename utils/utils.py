@@ -14,6 +14,9 @@ def norm(x, axis=None):
 #----- Poincaré Disk -----
 #-------------------------
 
+# NOTE: POSSIBLE ISSUE WITH DIFFERENT WAYS TO SPECIFY MINKOWSKI DOT PRODUCT
+# arbritray sign gives different signatures (+, +, +, -), (+, -, -, -)
+    
 # distance in poincare disk
 def poincare_dist(u, v, eps=1e-5):
     d = 1 + 2 * norm(u-v)**2 / ((1 - norm(u)**2) * (1 - norm(v)**2) + eps)
@@ -29,12 +32,17 @@ def poincare_distances(embedding):
     return dist_matrix
 
 # convert array from poincare disk to hyperboloid
-def poincare_pts_to_hyperboloid(Y, eps=1e-6):
+def poincare_pts_to_hyperboloid(Y, eps=1e-6, metric='Lorentz'):
     mink_pts = np.zeros((Y.shape[0], Y.shape[1]+1))
     r = norm(Y, axis=1)
-    mink_pts[:, 0] = 2/(1 - r**2 + eps) * Y[:, 0]
-    mink_pts[:, 1] = 2/(1 - r**2 + eps) * Y[:, 1]
-    mink_pts[:, 2] = 2/(1 - r**2 + eps) * (1 + r**2)/2
+    if metric == 'Minkowski':
+        mink_pts[:, 0] = 2/(1 - r**2 + eps) * (1 + r**2)/2
+        mink_pts[:, 1] = 2/(1 - r**2 + eps) * Y[:, 0]
+        mink_pts[:, 2] = 2/(1 - r**2 + eps) * Y[:, 1]
+    else:
+        mink_pts[:, 0] = 2/(1 - r**2 + eps) * Y[:, 0]
+        mink_pts[:, 1] = 2/(1 - r**2 + eps) * Y[:, 1]
+        mink_pts[:, 2] = 2/(1 - r**2 + eps) * (1 + r**2)/2
     return mink_pts
 
 # convert single point to hyperboloid
@@ -50,9 +58,16 @@ def poincare_pt_to_hyperboloid(y, eps=1e-6):
 #----- Hyperboloid Model ------
 #------------------------------
 
+# NOTE: POSSIBLE ISSUE WITH DIFFERENT WAYS TO SPECIFY MINKOWSKI DOT PRODUCT
+# arbritray sign gives different signatures (+, +, +, -), (+, -, -, -)
+
 # define hyperboloid bilinear form
 def hyperboloid_dot(u, v):
     return np.dot(u[:-1], v[:-1]) - u[-1]*v[-1]
+
+# define alternate minkowski/hyperboloid bilinear form
+def minkowski_dot(u, v):
+    return u[0]*v[0] - np.dot(u[1:], v[1:]) 
 
 # hyperboloid distance function
 def hyperboloid_dist(u, v, eps=1e-6):
