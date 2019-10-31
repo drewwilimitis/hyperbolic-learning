@@ -25,10 +25,10 @@ def poincare_distances(embedding):
     return dist_matrix
 
 # convert array from poincare disk to hyperboloid
-def poincare_pts_to_hyperboloid(Y, eps=1e-6, metric='Lorentz'):
+def poincare_pts_to_hyperboloid(Y, eps=1e-6, metric='lorentz'):
     mink_pts = np.zeros((Y.shape[0], Y.shape[1]+1))
     r = norm(Y, axis=1)
-    if metric == 'Minkowski':
+    if metric == 'minkowski':
         mink_pts[:, 0] = 2/(1 - r**2 + eps) * (1 + r**2)/2
         mink_pts[:, 1] = 2/(1 - r**2 + eps) * Y[:, 0]
         mink_pts[:, 2] = 2/(1 - r**2 + eps) * Y[:, 1]
@@ -39,12 +39,17 @@ def poincare_pts_to_hyperboloid(Y, eps=1e-6, metric='Lorentz'):
     return mink_pts
 
 # convert single point to hyperboloid
-def poincare_pt_to_hyperboloid(y, eps=1e-6):
+def poincare_pt_to_hyperboloid(y, eps=1e-6, metric='lorentz'):
     mink_pt = np.zeros((3, ))
     r = norm(y)
-    mink_pt[0] = 2/(1 - r**2 + eps) * y[0]
-    mink_pt[1] = 2/(1 - r**2 + eps) * y[1]
-    mink_pt[2] = 2/(1 - r**2 + eps) * (1 + r**2)/2
+    if metric == 'minkowski':
+        mink_pt[0] = 2/(1 - r**2 + eps) * (1 + r**2)/2
+        mink_pt[1] = 2/(1 - r**2 + eps) * y[0]
+        mink_pt[2] = 2/(1 - r**2 + eps) * y[1]
+    else:
+        mink_pt[0] = 2/(1 - r**2 + eps) * y[0]
+        mink_pt[1] = 2/(1 - r**2 + eps) * y[1]
+        mink_pt[2] = 2/(1 - r**2 + eps) * (1 + r**2)/2
     return mink_pt
 
 #------------------------------
@@ -63,8 +68,11 @@ def minkowski_dot(u, v):
     return u[0]*v[0] - np.dot(u[1:], v[1:]) 
 
 # hyperboloid distance function
-def hyperboloid_dist(u, v, eps=1e-6):
-    dist = np.arccosh(-1*hyperboloid_dot(u, v))
+def hyperboloid_dist(u, v, eps=1e-6, metric='lorentz'):
+    if metric == 'minkowski':
+        dist = np.arccosh(-1*minkowski_dot(u, v))
+    else:
+        dist = np.arccosh(-1*hyperboloid_dot(u, v))
     if np.isnan(dist):
         #print('Hyperboloid dist returned nan value')
         return eps
@@ -81,10 +89,14 @@ def hyperboloid_distances(embedding):
     return dist_matrix
 
 # convert array to poincare disk
-def hyperboloid_pts_to_poincare(X, eps=1e-6):
+def hyperboloid_pts_to_poincare(X, eps=1e-6, metric='lorentz'):
     poincare_pts = np.zeros((X.shape[0], X.shape[1]-1))
-    poincare_pts[:, 0] = X[:, 0] / ((X[:, 2]+1) + eps)
-    poincare_pts[:, 1] = X[:, 1] / ((X[:, 2]+1) + eps)
+    if metric == 'minkowski':
+        poincare_pts[:, 0] = X[:, 1] / (X[:, 0]+1)
+        poincare_pts[:, 1] = X[:, 2] / (X[:, 0]+1)
+    else:
+        poincare_pts[:, 0] = X[:, 0] / ((X[:, 2]+1) + eps)
+        poincare_pts[:, 1] = X[:, 1] / ((X[:, 2]+1) + eps)
     return poincare_pts
 
 # project within disk
@@ -94,10 +106,14 @@ def proj(theta,eps=1e-3):
     return theta
 
 # convert single point to poincare
-def hyperboloid_pt_to_poincare(x, eps=1e-6):
+def hyperboloid_pt_to_poincare(x, eps=1e-6, metric='lorentz'):
     poincare_pt = np.zeros((2, ))
-    poincare_pt[0] = x[0] / ((x[2]+1) + eps)
-    poincare_pt[1] = x[1] / ((x[2]+1) + eps)
+    if metric == 'minkowski':
+        poincare_pt[0] = x[1] / (x[0]+1)
+        poincare_pt[1] = x[2] / (x[0]+1)
+    else:
+        poincare_pt[0] = x[0] / ((x[2]+1) + eps)
+        poincare_pt[1] = x[1] / ((x[2]+1) + eps)
     return proj(poincare_pt)
     
 # helper function to generate samples
