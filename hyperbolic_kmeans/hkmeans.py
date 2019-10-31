@@ -200,7 +200,7 @@ class HyperbolicKMeans():
             cx = np.argmin(centroid_distances)
             labels[i][cx] = 1
         return labels
-    
+
 #------------------------------------------
 #----- Visualization helper functions -----
 #------------------------------------------

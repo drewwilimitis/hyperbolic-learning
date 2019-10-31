@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Oct 24 18:23:56 2019
-
-@author: dreww
-"""
-
 import numpy as np
 
 def norm(x, axis=None):
@@ -106,10 +99,6 @@ def hyperboloid_pt_to_poincare(x, eps=1e-6):
     poincare_pt[0] = x[0] / ((x[2]+1) + eps)
     poincare_pt[1] = x[1] / ((x[2]+1) + eps)
     return proj(poincare_pt)
-
-#------------------------------------
-#----- CLEAN/GENERATE DATASETS -----#
-#------------------------------------
     
 # helper function to generate samples
 def generate_data(n, radius=0.7, hyper=False):
@@ -123,38 +112,3 @@ def generate_data(n, radius=0.7, hyper=False):
         return poincare_pts_to_hyperboloid(init_data)
     else:
         return init_data
-    
-def clean_enron_data(output_path):
-    
-    # load file with emails & names
-    employees = pd.read_table('enron/employees.txt', delimiter='\t', header=None)
-    employees = employees.reset_index()
-    employees.columns = ['emp_index', 'emp_email', 'emp_info']
-    
-    # get node attributes
-    attributes = employees.emp_info.values
-    first_names = [x.split(' ')[0] for x in attributes]
-    last_names = []
-    for attr in attributes:
-        if len(attr.split(' ')) > 1:
-            last_names.append(attr.split(' ')[1])
-        else:
-            last_names.append('NA')
-    
-    # employee titles
-    titles = ['CEO', 'COO', 'President', 'Vice President', 'Director', 'Manager', 'Trader', 'Employee']
-    attr_list = [x.split(' ') for x in attributes]
-    emp_titles = []
-    for l in attr_list:
-        items = [x for x in l if x in titles]
-        if len(items) == 0:
-            emp_titles.append('NA')
-        else:
-            emp_titles.append([x for x in l if x in titles][0])
-    
-    employees['first'] = np.array(first_names)
-    employees['last'] = np.array(last_names)
-    employees['title'] = np.array(emp_titles)
-    employees.to_csv(output_path, index=False)
-    print('Saved enron attribute file to: ' + output_path)
-    

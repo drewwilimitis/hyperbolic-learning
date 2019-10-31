@@ -4,6 +4,8 @@
 # import libraries
 import pandas as pd
 import numpy as np
+from sklearn.metrics import precision_score, recall_score, f1_score, classification_report
+from sklearn.model_selection import train_test_split, ShuffleSplit, KFold
 from gensim.models.poincare import PoincareModel, PoincareRelations
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -41,6 +43,17 @@ def load_embeddings(file_path, delim=' '):
     emb.columns = ['node', 'x', 'y']
     return emb
 
-    
-    
-    
+# K-fold cross validation
+def evaluate_model(model, X, y, max_epochs=10, cv=5, report=True):
+    if report:
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+        model.fit(X_train, y_train, max_epochs=max_epochs)
+        y_pred = np.argmax(model.predict(X_test), axis=1)
+        print(classification_report(y_test, y_pred))
+    kf = KFold(n_splits=cv)
+    cv_scores = []
+    for train, test in kf.split(X):
+        model.fit(X[train], y[train], max_epochs=max_epochs)
+        y_pred = np.argmax(model.predict(X[test]), axis=1)
+        cv_scores.append(f1_score(y[test], y_pred, average='macro'))
+    return cv_scores
