@@ -92,8 +92,8 @@ def hyperboloid_distances(embedding):
 def hyperboloid_pts_to_poincare(X, eps=1e-6, metric='lorentz'):
     poincare_pts = np.zeros((X.shape[0], X.shape[1]-1))
     if metric == 'minkowski':
-        poincare_pts[:, 0] = X[:, 1] / (X[:, 0]+1)
-        poincare_pts[:, 1] = X[:, 2] / (X[:, 0]+1)
+        poincare_pts[:, 0] = X[:, 1] / ((X[:, 0]+1) + eps)
+        poincare_pts[:, 1] = X[:, 2] / ((X[:, 0]+1) + eps)
     else:
         poincare_pts[:, 0] = X[:, 0] / ((X[:, 2]+1) + eps)
         poincare_pts[:, 1] = X[:, 1] / ((X[:, 2]+1) + eps)
@@ -109,22 +109,22 @@ def proj(theta,eps=1e-3):
 def hyperboloid_pt_to_poincare(x, eps=1e-6, metric='lorentz'):
     poincare_pt = np.zeros((2, ))
     if metric == 'minkowski':
-        poincare_pt[0] = x[1] / (x[0]+1)
-        poincare_pt[1] = x[2] / (x[0]+1)
+        poincare_pt[0] = x[1] / ((x[0]+1) + eps)
+        poincare_pt[1] = x[2] / ((x[0]+1) + eps)
     else:
         poincare_pt[0] = x[0] / ((x[2]+1) + eps)
         poincare_pt[1] = x[1] / ((x[2]+1) + eps)
     return proj(poincare_pt)
     
 # helper function to generate samples
-def generate_data(n, radius=0.7, hyper=False):
+def generate_data(n, radius=0.7, hyperboloid=False):
     theta = np.random.uniform(0, 2*np.pi, n)
     u = np.random.uniform(0, radius, n)
     r = np.sqrt(u)
     x = r * np.cos(theta)
     y = r * np.sin(theta)
     init_data = np.hstack((x.reshape(-1,1), y.reshape(-1,1)))
-    if hyper:
+    if hyperboloid:
         return poincare_pts_to_hyperboloid(init_data)
     else:
         return init_data

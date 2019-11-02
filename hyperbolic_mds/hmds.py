@@ -287,15 +287,6 @@ class HyperMDS():
 #----- EVALUATION UTILITY FUNCTIONS -----
 #----------------------------------------
         
-# compute poincaré distance matrix
-def pd_matrix(embedding):
-    n = embedding.shape[0]
-    dist_matrix = np.zeros((n, n))
-    for i in range(n):
-        for j in range(i+1, n):
-            dist_matrix[i][j] = poincare_dist(embedding[i], embedding[j])
-    return dist_matrix
-
 # compute Sammon stress of the embedding
 def sammon_stress(embedding, dissimilarity_matrix, alpha=1):
     stress = 0
