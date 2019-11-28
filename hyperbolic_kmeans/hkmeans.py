@@ -217,28 +217,32 @@ def plot_clusters(emb, labels, centroids, edge_list, title=None, height=8, width
     plt.figure(figsize=(width,height))
     plt.xlim([-1.0,1.0])
     plt.ylim([-1.0,1.0])
+    ax = plt.gca()
+    circ = plt.Circle((0, 0), radius=1, edgecolor='black', facecolor='None', linewidth=3, alpha=0.5)
+    ax.add_patch(circ)
+    
     # set colormap
     if n_clusters <= 12:
         colors = ['b', 'r', 'g', 'y', 'm', 'c', 'k', 'silver', 'lime', 'skyblue', 'maroon', 'darkorange']
-    elif 10 < n_clusters <= 20:
+    elif 12 < n_clusters <= 20:
         colors = [i for i in plt.cm.get_cmap('tab20').colors]
     else:
         cmap = plt.cm.get_cmap(name='viridis')
         colors = cmap(np.linspace(0, 1, n_clusters))
-    # get embedding coordinates
+    
+    # plot embedding coordinates and centroids
     emb_data = np.array(emb.iloc[:, 1:3])
     for i in range(n_clusters):
         plt.scatter(emb_data[(labels[:, i] == 1), 0], emb_data[(labels[:, i] == 1), 1],
                              color = colors[i], alpha=0.8, edgecolors='w', linewidth=2, s=250)
         plt.scatter(centroids[i, 0], centroids[i, 1], s=750, color = colors[i],
                     edgecolor='black', linewidth=2, marker='*');
+    
+    # plot edges
     for i in range(int(len(edge_list) * edge_frac)):
         x1 = emb.loc[(emb.iloc[:, 0] == edge_list[i][0]), ['x', 'y']].values[0]
         x2 = emb.loc[(emb.node == edge_list[i][1]), ['x', 'y']].values[0]
         _ = plt.plot([x1[0], x2[0]], [x1[1], x2[1]], '--', c='black', linewidth=1, alpha=0.35)
-    ax = plt.gca()
-    circ = plt.Circle((0, 0), radius=1, edgecolor='black', facecolor='None', linewidth=3, alpha=0.5)
-    ax.add_patch(circ)
     
     # add labels to embeddings
     if add_labels and label_dict != None:
@@ -246,6 +250,7 @@ def plot_clusters(emb, labels, centroids, edge_list, title=None, height=8, width
         plt.axis('off')
         embed_vals = np.array(list(label_dict.values()))
         keys = list(label_dict.keys())
+        # set threshhold to limit plotting labels too close together
         min_dist_2 = label_frac * max(embed_vals.max(axis=0) - embed_vals.min(axis=0)) ** 2
         labeled_vals = np.array([2*embed_vals.max(axis=0)])
         n = int(plot_frac*len(embed_vals))

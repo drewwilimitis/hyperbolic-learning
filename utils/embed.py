@@ -41,6 +41,13 @@ def load_embeddings(file_path, delim=' '):
     emb = pd.read_table(file_path, delimiter=' ')
     emb = emb.reset_index()
     emb.columns = ['node', 'x', 'y']
+    if emb.dtypes['node'] != np.number:
+        try:
+            emb = emb.loc[(emb.node.apply(lambda x: x not in ['u', 'v'])), :]
+            emb['node'] = emb.node.astype('int')
+            emb = emb.sort_values(by='node').reset_index(drop=True)
+        except ValueError as e:
+            pass
     return emb
 
 # K-fold cross validation
