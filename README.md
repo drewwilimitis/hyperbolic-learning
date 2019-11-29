@@ -18,11 +18,16 @@
   
 * __K-Means Clustering in the Hyperboloid Model__:
   - Optimization approach using Frechet means to define a centroid/center of mass in hyperbolic space __[3, 4]__.
+
+
+  ![mammals_kmeans](https://user-images.githubusercontent.com/16658498/69854572-08f1c480-124f-11ea-9682-5615dc05063d.png)
+
   
 * __Hyperbolic Support Vector Machine__ - 
   - Linear hyperbolic SVC based on the max-margin optimization problem in hyperbolic geometry __[5]__.
   - Uses projected gradient descent to define decision boundary and predict classifications.
-  
+
+
 ![hsvm_decision_boundaries](https://user-images.githubusercontent.com/16658498/69854243-39852e80-124e-11ea-97aa-d8d34ba107d8.png)
 
   
