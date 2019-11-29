@@ -12,8 +12,11 @@ import sys
 # import modules within repository
 my_path = 'C:\\Users\\dreww\\Desktop\\hyperbolic-learning\\utils' # path to utils folder
 sys.path.append(my_path)
+my_path = 'C:\\Users\\dreww\\Desktop\\hyperbolic-learning\\hyperbolic_svm'
+sys.path.append(my_path)
 from utils import *
-from datasets import *
+from datasets import * 
+from platt import *
 
 #-----------------------------------------------
 #----- Hyperbolic Support Vector Classifier ----
@@ -152,16 +155,21 @@ class LinearHSVM():
         X : array, shape (n_samples, n_features)
         y : array, shape (n_samples, 1)
         """
+        # set attribute for training labels
+        self.y_train = y
+        
         if self.multiclass:
             y_binary = label_binarize(y, classes=np.unique(y))
+            self.class_labels_ = np.unique(y)
             self.coef_ = []
-            for i in range(len(y_binary)):
+            for i in range(len(np.unique(y))):
                 self.init_weights(X, y_binary[:, i])
                 wi = train_hsvm(self.init_coef, X, y_binary[:, i], self.C, 
                                         self.num_epochs, self.lr, self.batch_size,
                                         early_stopping=self.early_stopping,
                                         max_lr_attempts=self.max_retries, verbose=self.verbose)
                 self.coef_.append(wi)
+            
         
         else:    
             self.init_weights(X, y)
@@ -180,19 +188,72 @@ class LinearHSVM():
         ----------
         X : array, shape (n_samples, n_features)
         """
+       
         if self.multiclass:
             n_classes = len(self.coef_)
-            y_pred = np.zeros((X.shape[0], n_classes))
+            
+            # we find probabilities of belonging to each class 
+            y_probs = np.zeros((X.shape[0], n_classes))
+            
+            # find each class prediction score and apply Platt probability scaling
             for i in range(n_classes):
-                vals = np.array([minkowski_dot(self.coef_[i], x) for x in X])
-                y_pred[:, i] = vals
-            y_pred = np.argmax(y_pred, axis=1)
+                decision_vals = np.array([minkowski_dot(self.coef_[i], x) for x in X])
+                # get binary labels {0, 1} for the separate 'OVR' classifiers
+                yi_train = (self.y_train == self.class_labels_[i]).astype('int')
+                # convert labels = {0, 1} to {-1, 1}
+                yi_train = 2*yi_train - 1
+                # get platt coefs A, B
+                platt_coefs = SigmoidTrain(deci=decision_vals, label=yi_train, prior1=None, prior0=None)
+                for j in range(X.shape[0]):
+                    y_probs[j, i] = SigmoidPredict(deci=decision_vals[j], AB=platt_coefs)
+            # set prediction label to the highest probability class
+            y_pred = self.class_labels_[np.argmax(y_probs, axis=1)]
         else:    
             y_pred = np.zeros((X.shape[0], ))
             vals = np.array([minkowski_dot(self.coef_, x) for x in X])
             y_pred[vals < 0] = self.class_labels_['neg_class']
             y_pred[vals >= 0] = self.class_labels_['pos_class']
         return y_pred
+    
+    def predict_proba(self, X):
+        """
+        Predict probability from Platt method and hyperbolic decision function vals
+        Parameters
+        ----------
+        X : array, shape (n_samples, n_features)
+        """
+       
+        if self.multiclass:
+            n_classes = len(self.coef_)
+            
+            # we find probabilities of belonging to each class 
+            y_probs = np.zeros((X.shape[0], n_classes))
+            
+            # find each class prediction score and apply Platt probability scaling
+            for i in range(n_classes):
+                decision_vals = np.array([minkowski_dot(self.coef_[i], x) for x in X])
+                # get binary labels {0, 1} for the separate 'OVR' classifiers
+                yi_train = (self.y_train == self.class_labels_[i]).astype('int')
+                # convert labels = {0, 1} to {-1, 1}
+                yi_train = 2*yi_train - 1
+                # get platt coefs A, B
+                platt_coefs = SigmoidTrain(deci=decision_vals, label=yi_train, prior1=None, prior0=None)
+                for j in range(X.shape[0]):
+                    y_probs[j, i] = SigmoidPredict(deci=decision_vals[j], AB=platt_coefs)
+            return y_probs
+        
+        else:
+            y_probs = np.zeros((X.shape[0], ))
+            decision_vals = np.array([minkowski_dot(self.coef_, x) for x in X])
+            # convert labels = {0, 1} to {-1, 1}
+            yi_train = 2*self.y_train - 1
+            # get platt coefs A, B
+            platt_coefs = SigmoidTrain(deci=decision_vals, label=yi_train, prior1=None, prior0=None)
+            for j in range(X.shape[0]):
+                y_probs[j] = SigmoidPredict(deci=decision_vals[j], AB=platt_coefs)
+            return y_probs
+            
+            
     
     def score(self, X, y):
         """
@@ -213,6 +274,7 @@ class LinearHSVM():
         else:    
             pred_vals = np.array([minkowski_dot(self.coef_, x) for x in X])
         return pred_vals
+    
     
 #---------------------------------------
 #----- Evaluation and Visualization ----
