@@ -20,7 +20,7 @@
   - Optimization approach using Frechet means to define a centroid/center of mass in hyperbolic space __[3, 4]__.
 
 
-  ![mammals_kmeans](https://user-images.githubusercontent.com/16658498/69854572-08f1c480-124f-11ea-9682-5615dc05063d.png)
+  ![mammals_kmeans](https://user-images.githubusercontent.com/16658498/69854762-7f8ec200-124f-11ea-9cab-719efc965aa2.png)
 
   
 * __Hyperbolic Support Vector Machine__ - 
