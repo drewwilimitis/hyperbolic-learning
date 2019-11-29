@@ -23,13 +23,14 @@
   - Linear hyperbolic SVC based on the max-margin optimization problem in hyperbolic geometry __[5]__.
   - Uses projected gradient descent to define decision boundary and predict classifications.
   
+![hsvm_decision_boundaries](https://user-images.githubusercontent.com/16658498/69854243-39852e80-124e-11ea-97aa-d8d34ba107d8.png)
+
+  
 * __Embedding Graphs in Lorentzian Spacetime__ -  
   - An algorithm based on notions of causality in the Minkowski spacetime formulation of special relativity __[6]__.
   - Used to embed directed acyclic graphs where nodes are represented by space-like and time-like coordinates. 
 
 ![hep-th_citation_network](https://user-images.githubusercontent.com/16658498/65956193-6fa16000-e40f-11e9-935b-a518a77b6525.png)
-
-![poincare_kmeans](https://user-images.githubusercontent.com/16658498/62563652-11aa2f00-b849-11e9-93e5-4665f9020052.png)
 
 ## Datasets
 - Zachary Karate Club Network
