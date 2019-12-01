@@ -357,3 +357,17 @@ def plot_hyp_line(dist, gamma, z0, color = 'black', whole_line = False, z0_label
     pts = np.array(pts)
     ax.scatter(np.real(pts), np.imag(pts), s=25, alpha=1, c=color)
     ax.scatter(np.real(z0), np.imag(z0), s=25, alpha=1, c=color);
+    
+def plot_decision_boundary(hsvm_clf, )
+""" Plot linear hyperbolic decision boundary in poincare disk """
+    w = hsvm_clf.coef_
+    n_classes = len(hsvm_clf.class_labels_)
+    # select random uniform sample over poincare disk
+    L2 = poincare_pts_to_hyperboloid(-2*np.random.rand(100000, 2)+1, metric='minkowski')
+    for i in range(n_classes):
+        # approx. i.e. the set {x: minkowski_dot(x, w) = 0} that defines boundary
+        inter = np.array([np.abs(minkowski_dot(x, w[i])) for x in L2]) < 1e-2
+        dec_bound = L2[inter]
+        ball_dec = hyperboloid_pts_to_poincare(dec_bound, metric='minkowski')
+        ball_dec = ball_dec[norm(ball_dec, axis=1) < 1]
+        plt.scatter(-ball_dec[:, 0], -ball_dec[:, 1], s=55, color=colors[i], marker='.')
