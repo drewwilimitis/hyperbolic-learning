@@ -9,6 +9,21 @@ from sklearn.model_selection import train_test_split, ShuffleSplit, KFold
 from gensim.models.poincare import PoincareModel, PoincareRelations
 import logging
 logging.basicConfig(level=logging.INFO)
+import time
+import os
+import sys
+
+
+# import modules within repository
+my_path = 'C:\\Users\\dreww\\Desktop\\hyperbolic-learning\\utils' # path to utils folder
+my_path = 'C:\\Users\\1394852\\Documents\\GitHub\\hyperbolic-learning\\utils'
+sys.path.append(my_path)
+my_path = 'C:\\Users\\dreww\\Desktop\\hyperbolic-learning\\hyperbolic_svm'
+my_path = 'C:\\Users\\1394852\\Documents\\GitHub\\hyperbolic-learning\\hyperbolic_svm'
+sys.path.append(my_path)
+from utils import *
+from datasets import * 
+from platt import *
 
 def train_embeddings(input_path, # path to input edge relations
                      delimiter, # input file delim
@@ -54,10 +69,10 @@ def load_embeddings(file_path, delim=' '):
 def evaluate_model(model, X, y, max_epochs=10, cv=5, report=True, classifier='hkmeans'):
     # print classification report with other metrics
     if report:
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
         if classifier == 'hsvm':
             model.fit(poincare_pts_to_hyperboloid(X_train, metric='minkowski'), y_train)
-            y_pred = model.predict(poincare_pts_to_hyperboloid(X, metric='minkowski'))
+            y_pred = model.predict(poincare_pts_to_hyperboloid(X_test, metric='minkowski'))
         else:
             model.fit(X_train, y_train, max_epochs=max_epochs)
             y_pred = np.argmax(model.predict(X_test), axis=1)

@@ -7,7 +7,7 @@ import scipy as sp
 from utils import *
 
 # read in matlab data files from: https://github.com/hhcho/hyplinear
-def get_gaussian_data(path):
+def load_mat_file(path):
     # load .mat files with gaussian datasets
     data = sp.io.loadmat(path)
     X, y = data['B'], data['label'].ravel().astype(np.int)

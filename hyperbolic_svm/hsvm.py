@@ -11,9 +11,11 @@ import sys
 
 # import modules within repository
 my_path = 'C:\\Users\\dreww\\Desktop\\hyperbolic-learning\\utils' # path to utils folder
+my_path = 'C:\\Users\\1394852\\Documents\\GitHub\\hyperbolic-learning\\utils'
 sys.path.append(my_path)
 my_path = 'C:\\Users\\dreww\\Desktop\\hyperbolic-learning\\hyperbolic_svm'
-sys.path.append(my_path)
+my_path = 'C:\\Users\\1394852\\Documents\\GitHub\\hyperbolic-learning\\hyperbolic_svm'
+#sys.path.append(my_path)
 from utils import *
 from datasets import * 
 from platt import *
@@ -162,6 +164,7 @@ class LinearHSVM():
             y_binary = label_binarize(y, classes=np.unique(y))
             self.class_labels_ = np.unique(y)
             self.coef_ = []
+            self.platt_coefs_ = []
             for i in range(len(np.unique(y))):
                 self.init_weights(X, y_binary[:, i])
                 wi = train_hsvm(self.init_coef, X, y_binary[:, i], self.C, 
@@ -169,8 +172,17 @@ class LinearHSVM():
                                         early_stopping=self.early_stopping,
                                         max_lr_attempts=self.max_retries, verbose=self.verbose)
                 self.coef_.append(wi)
-            
-        
+                
+            # get platt coefficients for probability scaling
+            for i in range(len(np.unique(y))):
+                decision_vals = np.array([minkowski_dot(self.coef_[i], x) for x in X])
+                # get binary labels {0, 1} for the separate 'OVR' classifiers
+                yi_train = (self.y_train == self.class_labels_[i]).astype('int')
+                # convert labels = {0, 1} to {-1, 1}
+                yi_train = 2*yi_train - 1
+                # get platt coefs A, B
+                ab = SigmoidTrain(deci=decision_vals, label=yi_train, prior1=None, prior0=None)
+                self.platt_coefs_.append(ab)
         else:    
             self.init_weights(X, y)
             classes = np.unique(y)
@@ -179,6 +191,12 @@ class LinearHSVM():
                                     self.num_epochs, self.lr, self.batch_size,
                                     early_stopping=self.early_stopping,
                                     max_lr_attempts=self.max_retries, verbose=self.verbose)
+            decision_vals = np.array([minkowski_dot(self.coef_, x) for x in X])
+            # convert labels = {0, 1} to {-1, 1}
+            yi_train = 2*self.y_train - 1
+            # get platt coefs A, B
+            ab = SigmoidTrain(deci=decision_vals, label=yi_train, prior1=None, prior0=None)
+            self.platt_coefs_ = ab
         return self
 
     def predict(self, X):
@@ -198,14 +216,8 @@ class LinearHSVM():
             # find each class prediction score and apply Platt probability scaling
             for i in range(n_classes):
                 decision_vals = np.array([minkowski_dot(self.coef_[i], x) for x in X])
-                # get binary labels {0, 1} for the separate 'OVR' classifiers
-                yi_train = (self.y_train == self.class_labels_[i]).astype('int')
-                # convert labels = {0, 1} to {-1, 1}
-                yi_train = 2*yi_train - 1
-                # get platt coefs A, B
-                platt_coefs = SigmoidTrain(deci=decision_vals, label=yi_train, prior1=None, prior0=None)
                 for j in range(X.shape[0]):
-                    y_probs[j, i] = SigmoidPredict(deci=decision_vals[j], AB=platt_coefs)
+                    y_probs[j, i] = SigmoidPredict(deci=decision_vals[j], AB=self.platt_coefs_[i])
             # set prediction label to the highest probability class
             y_pred = self.class_labels_[np.argmax(y_probs, axis=1)]
         else:    
@@ -232,29 +244,17 @@ class LinearHSVM():
             # find each class prediction score and apply Platt probability scaling
             for i in range(n_classes):
                 decision_vals = np.array([minkowski_dot(self.coef_[i], x) for x in X])
-                # get binary labels {0, 1} for the separate 'OVR' classifiers
-                yi_train = (self.y_train == self.class_labels_[i]).astype('int')
-                # convert labels = {0, 1} to {-1, 1}
-                yi_train = 2*yi_train - 1
-                # get platt coefs A, B
-                platt_coefs = SigmoidTrain(deci=decision_vals, label=yi_train, prior1=None, prior0=None)
                 for j in range(X.shape[0]):
-                    y_probs[j, i] = SigmoidPredict(deci=decision_vals[j], AB=platt_coefs)
+                    y_probs[j, i] = SigmoidPredict(deci=decision_vals[j], AB=self.platt_coefs_)
             return y_probs
         
         else:
             y_probs = np.zeros((X.shape[0], ))
             decision_vals = np.array([minkowski_dot(self.coef_, x) for x in X])
-            # convert labels = {0, 1} to {-1, 1}
-            yi_train = 2*self.y_train - 1
-            # get platt coefs A, B
-            platt_coefs = SigmoidTrain(deci=decision_vals, label=yi_train, prior1=None, prior0=None)
-            for j in range(X.shape[0]):
-                y_probs[j] = SigmoidPredict(deci=decision_vals[j], AB=platt_coefs)
+            for i in range(X.shape[0]):
+                y_probs[i] = SigmoidPredict(deci=decision_vals[i], AB=self.platt_coefs_)
             return y_probs
             
-            
-    
     def score(self, X, y):
         """
         Return accuracy evaluated on X, y
@@ -357,17 +357,3 @@ def plot_hyp_line(dist, gamma, z0, color = 'black', whole_line = False, z0_label
     pts = np.array(pts)
     ax.scatter(np.real(pts), np.imag(pts), s=25, alpha=1, c=color)
     ax.scatter(np.real(z0), np.imag(z0), s=25, alpha=1, c=color);
-    
-def plot_decision_boundary(hsvm_clf, )
-""" Plot linear hyperbolic decision boundary in poincare disk """
-    w = hsvm_clf.coef_
-    n_classes = len(hsvm_clf.class_labels_)
-    # select random uniform sample over poincare disk
-    L2 = poincare_pts_to_hyperboloid(-2*np.random.rand(100000, 2)+1, metric='minkowski')
-    for i in range(n_classes):
-        # approx. i.e. the set {x: minkowski_dot(x, w) = 0} that defines boundary
-        inter = np.array([np.abs(minkowski_dot(x, w[i])) for x in L2]) < 1e-2
-        dec_bound = L2[inter]
-        ball_dec = hyperboloid_pts_to_poincare(dec_bound, metric='minkowski')
-        ball_dec = ball_dec[norm(ball_dec, axis=1) < 1]
-        plt.scatter(-ball_dec[:, 0], -ball_dec[:, 1], s=55, color=colors[i], marker='.')
