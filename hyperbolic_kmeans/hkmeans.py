@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-my_path = 'C:\\Users\\dreww\\Desktop\\hyperbolic-learning' # path to utils.py 
+my_path = 'C:\\Users\\dreww\\Desktop\\hyperbolic-learning\\utils' # path to utils.py 
 sys.path.append(my_path)
 from utils import *
 
@@ -132,12 +132,15 @@ class HyperbolicKMeans():
                 new_centroids[i] = hyperboloid_pt_to_poincare(fmean_k)
         self.centroids = new_centroids
         
-    def cluster_var(self, X):
+    def cluster_var(self, X, return_all=False):
         n = self.centroids.shape[0]
         var_C = []
         for i in range(n):
             var_C.append(np.mean(np.array([poincare_dist(self.centroids[i], x) for x in X])))
-        self.variances = np.sort(var_C)[-2]
+        if return_all:
+            self.variances = var_C
+        else:
+            self.variances = np.sort(var_C)[-2]
     
     def fit(self, X, y=None, max_epochs=40, verbose=False):
         """

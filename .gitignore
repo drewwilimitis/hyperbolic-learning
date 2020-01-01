@@ -16,7 +16,7 @@ data/science_closure.csv
 /data/network_datasets/
 *__pycache__*
 hyperbolic_kmeans/enron/emails.csv
-
+applications/brain_connectome/embed/
 *.ini
 *.bz2
 *.pyc

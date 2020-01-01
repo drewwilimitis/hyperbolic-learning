@@ -16,10 +16,8 @@ import sys
 
 # import modules within repository
 my_path = 'C:\\Users\\dreww\\Desktop\\hyperbolic-learning\\utils' # path to utils folder
-my_path = 'C:\\Users\\1394852\\Documents\\GitHub\\hyperbolic-learning\\utils'
 sys.path.append(my_path)
 my_path = 'C:\\Users\\dreww\\Desktop\\hyperbolic-learning\\hyperbolic_svm'
-my_path = 'C:\\Users\\1394852\\Documents\\GitHub\\hyperbolic-learning\\hyperbolic_svm'
 sys.path.append(my_path)
 from utils import *
 from datasets import * 
