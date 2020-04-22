@@ -1,4 +1,4 @@
-﻿# hyperbolic-learning
+`Drew Wilimitis`
 
 **It has been recently established that many real-world networks have a latent geometric structure that resembles negatively curved hyperbolic spaces. Therefore, complex networks, and particularly the hierarchical relationships often found within, can often be more accurately represented by embedding graphs in hyperbolic geometry, rather than flat Euclidean space.**
 
@@ -13,17 +13,17 @@
   - Mostly an exploration of the hyperbolic embedding approach used in __[1]__.
   - Available implementation in the `gensim` library and a PyTorch version released by the authors [here](https://github.com/facebookresearch/poincare-embeddings).
   
-* __Hyperbolic Multidimensional Scaling__:
+* __Hyperbolic Multidimensional Scaling__: [nbviewer](https://nbviewer.jupyter.org/github/drewwilimitis/hyperbolic-learning/blob/master/hyperbolic_mds/hyperbolic_mds_results.ipynb)
   - Finds embedding in Poincaré disk with hyperbolic distances that preserve input dissimilarities __[2]__.
   
-* __K-Means Clustering in the Hyperboloid Model__:
+* __K-Means Clustering in the Hyperboloid Model__: [nbviewer](https://nbviewer.jupyter.org/github/drewwilimitis/hyperbolic-learning/blob/master/hyperbolic_kmeans/hyperbolic_kmeans_results.ipynb)
   - Optimization approach using Frechet means to define a centroid/center of mass in hyperbolic space __[3, 4]__.
 
 
   ![mammals_kmeans](https://user-images.githubusercontent.com/16658498/69854762-7f8ec200-124f-11ea-9cab-719efc965aa2.png)
 
   
-* __Hyperbolic Support Vector Machine__ - 
+* __Hyperbolic Support Vector Machine__ - [nbviewer](https://nbviewer.jupyter.org/github/drewwilimitis/hyperbolic-learning/blob/master/hyperbolic_svm/hyperbolic_svm_results.ipynb)
   - Linear hyperbolic SVC based on the max-margin optimization problem in hyperbolic geometry __[5]__.
   - Uses projected gradient descent to define decision boundary and predict classifications.
 
@@ -31,7 +31,7 @@
 ![hsvm_decision_boundaries](https://user-images.githubusercontent.com/16658498/69854243-39852e80-124e-11ea-97aa-d8d34ba107d8.png)
 
   
-* __Embedding Graphs in Lorentzian Spacetime__ -  
+* __Embedding Graphs in Lorentzian Spacetime__ -  [nbviewer](https://nbviewer.jupyter.org/github/drewwilimitis/hyperbolic-learning/blob/master/spacetime_graph_embeddings/spacetime_embedding_results.ipynb)
   - An algorithm based on notions of causality in the Minkowski spacetime formulation of special relativity __[6]__.
   - Used to embed directed acyclic graphs where nodes are represented by space-like and time-like coordinates. 
 
