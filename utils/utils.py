@@ -100,7 +100,7 @@ def hyperboloid_pts_to_poincare(X, eps=1e-6, metric='lorentz'):
     return poincare_pts
 
 # project within disk
-def proj(theta,eps=1e-3):
+def proj(theta,eps=0.1):
     if norm(theta) >= 1:
         theta = theta/norm(theta) - eps
     return theta

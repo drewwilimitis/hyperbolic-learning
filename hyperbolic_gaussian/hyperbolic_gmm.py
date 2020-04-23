@@ -23,47 +23,51 @@ class HyperbolicGMM():
     Note: Follows the Expectation-Maximization (EM) approach for Unsupervised Clustering
     """
     
-    def __init__(self,n_clusters=3,max_iter=300,tol=1e-5,verbose=False):
+    def __init__(self, n_clusters=3, verbose=False):
         """ Initialize Gaussian Mixture Model and set training parameters """
         self.n_clusters = n_clusters
-        self.max_iter = max_iter
-        self.tol = tol
         self.verbose = verbose
-        self.labels = None
-        self.cluster_weights = np.repeat(1, n_clusters)
         
-    def init_gaussians(self, radius=0.3):
-        """ Randomly sample starting points (centers) around small uniform ball """
-        theta = np.random.uniform(0, 2*np.pi, self.n_clusters)
-        u = np.random.uniform(0, radius, self.n_clusters)
-        r = np.sqrt(u)
-        x = r * np.cos(theta)
-        y = r * np.sin(theta)
-        centers = np.hstack((x.reshape(-1,1), y.reshape(-1,1)))
-        self.means = centers
+    def init_params(self, X=None, radius=0.15, method='random_sample'):
+        """ Initialize parameter configurations that define gaussian clusters
+        Options: 
+            1.) Randomly sample points around small uniform ball
+            2.) Set cluster center at randomly chosen data points
+            3.) Initialize with K-Means clustering (not implemented here)
+        """
+        if method == 'random_sample':
+            theta = np.random.uniform(0, 2*np.pi, self.n_clusters)
+            u = np.random.uniform(0, radius, self.n_clusters)
+            r = np.sqrt(u)
+            x = r * np.cos(theta)
+            y = r * np.sin(theta)
+            centers = np.hstack((x.reshape(-1,1), y.reshape(-1,1)))
+            self.means = poincare_pts_to_hyperboloid(centers, metric='minkowski')
+            
+        elif method == 'select_points' and X is not None:
+            indices = np.random.randint(0, self.n_samples, self.n_clusters)
+            self.means = poincare_pts_to_hyperboloid(X[indices], metric='minkowski')
+            
+        # methods exist to initialize variances but I use unit variance here
         self.variances = np.tile([1, 1], self.n_clusters).reshape((self.n_clusters, 2))
+        
+        # we initialize the cluster weights evenly
+        self.cluster_weights = np.repeat(1/self.n_samples, self.n_clusters)
         
     #------------------------------------------------------------------------------
     #------------------------ EXPECTATION STEP ------------------------------------
     #------------------------------------------------------------------------------
-        
-    def normalization_term(self, xi):
-        """ Sum all weighted likelihood assignments for normalization """
-        total = 0
-        K = len(self.cluster_weights)
-        for i in range(K):
-            total += self.cluster_weights[i]*log_pdf(z=xi, mu=self.means[i], sigma=self.variances[i])
-        return total
 
     def update_likelihoods(self, X):
         """ Compute likelihoods using log-pdf of Wrapped Normal Distribution """
-        N = X.shape[0]
-        K = self.n_clusters
-        W = np.array((K, N))
-        for j in range(K):
-            for i in range(N):
-                W[j, i] = self.cluster_weights[j] * log_pdf(z=X[i], mu=self.means[j], sigma=self.variances[j])
-                W[j, i] /= normalization_term(X[i])
+        W = np.zeros((self.n_samples, self.n_clusters))
+        for i in range(self.n_samples):
+            for j in range(self.n_clusters):
+                W[i, j] = self.cluster_weights[j] * log_pdf(z=X[i], mu=self.means[j], sigma=self.variances[j])
+            # divide by row sum to normalize assignment probabilities
+            row_sum = W[i, :].sum()
+            W[i, :] = W[i, :] / row_sum
+        # set assignment probabilities to be updated
         self.likelihoods = W
                 
     #-----------------------------------------------------------------------------
@@ -72,18 +76,34 @@ class HyperbolicGMM():
     
     def update_cluster_weights(self):
         """ Update new cluster weights based on cluster assignment likelihoods """
-        # W: matrix with weights w_1k, ..., w_Nk - shape K x N
-        K = self.likelihoods.shape[0]
-        N = self.likelihoods.shape[1]
-        updated_weights = np.array([np.sum(self.likelihoods[i, :])/N for i in range(K)])
-        self.cluster_weights = updated_weights
+        for j in range(self.n_clusters):
+            new_weight = self.likelihoods[:, j].sum() / self.n_samples
+            self.cluster_weights[j] = new_weight
         
     def update_means(self, X, num_rounds=10, alpha=0.3, tol=1e-4):
         """ Apply weighted barycenter algorithm to update gaussian clusters """
+        train_means = []
         for i in range(self.n_clusters):
-            self.means[i] = weighted_barycenter(self.means[i], X, self.likelihoods[i, :])
+            new_mean = weighted_barycenter(self.means[i], X, self.likelihoods[:, i], num_rounds = num_rounds, alpha=alpha, tol=tol)
+            self.means[i] = new_mean
+            train_means.append(new_mean)
+        return train_means
+        
+    #-----------------------------------------------------------------------------
+    #------------------------ TRAINING ROUTINE -----------------------------------
+    #-----------------------------------------------------------------------------
+    
+    
+    def loss_fn(self, X):
+        """ Wrapper for auxilliary function to compute total barycenter loss """
+        loss = 0
+        for i in range(self.n_clusters):
+            distances = np.array([hyperboloid_dist(self.means[i], x, metric='minkowski')**2 for x in X])
+            weighted_distances = self.likelihoods[:, i] * distances
+            loss += np.sum(weighted_distances)
+        self.loss = loss
             
-    def fit(self, X, y=None, max_epochs=40, verbose=False):
+    def fit(self, X, y=None, max_epochs=40, alpha=0.3, metrics=False, verbose=False):
         """
         Fit K gaussian distributed clusters to data, return cluster assignments by max likelihood 
         Parameters
@@ -95,31 +115,38 @@ class HyperbolicGMM():
         """
         
         # make sure X within poincaré ball
-        if (norm(X, axis=1) > 1).any():
-            X = X / (np.max(norm(X, axis=1)))
+        #if (norm(X, axis=1) > 1).any():
+        #    X = X / (np.max(norm(X, axis=1)))
         
-        # initialize random gaussian centroids
+        # initialize gaussian mixture parameters
         self.n_samples = X.shape[0]
-        self.init_gaussians()
-        
-        # compute initial likelihoods for x1, ..., xN
-        self.update_likelihoods(X)
+        self.init_params()
+        if metrics:
+            train_vals = []
+        # initialize assignments as the most likely cluster for each xi
+        self.assignments = np.zeros((self.n_samples, self.n_clusters))
         
         # loop through the expectation and maximization steps
         for j in range(max_epochs):
-            self.loss = 0
+
+            # update likelihoods given new parameters
+            self.update_likelihoods(X)
+
+            # update parameters given likelihoods
             self.update_cluster_weights()
-            self.update_means(X)
-            for i in range(self.n_samples):
-                # zero out current cluster assignment
-                self.assignments[i, :] = np.zeros((1, self.n_clusters))
-                # find closest centroid (in Poincare disk)
-                centroid_distances = np.array([poincare_dist(X[i], centroid) for centroid in self.centroids])
-                cx = np.argmin(centroid_distances)
-                self.inertia_ += centroid_distances[cx]**2
-                self.assignments[i][cx] = 1
+            train_means = self.update_means(X, num_rounds=10, alpha=alpha, tol = 1e-8)
+            train_vals.append(train_means)
             if verbose:
-                print('Epoch ' + str(j) + ' complete')
-        self.labels = np.argmax(self.assignments, axis=1)
-        self.cluster_var(X)
-        return
+                self.loss_fn(X)
+                print('---- Epoch ' + str(j) + ' complete ---- Loss: ' + str(self.loss))
+            
+        for i in range(self.n_samples):
+            # zero out current cluster assignment
+            self.assignments[i, :] = np.zeros((1, self.n_clusters))
+            # find centroid that gives maximum likelihood
+            k_max = np.argmax(self.likelihoods[i, :])
+            self.assignments[i, k_max] = 1
+                
+        self.labels = np.argmax(self.likelihoods, axis=1)
+        self.loss_fn(X)
+        return train_vals
