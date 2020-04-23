@@ -20,9 +20,9 @@ def exp_map(v, theta_k, eps=1e-6):
 def minkowski_distance_gradient(u, v):
     """ Riemannian gradient of hyperboloid distance w.r.t point u """ 
     # u,v in hyperboloid
-    return -1*(hyperboloid_dot(u,v)**2 - 1)**-1/2 * v
+    return -1*(minkowski_dot(u,v)**2 - 1)**-1/2 * v
 
-def minkowski_loss_gradient(theta_k, X, w):
+def minkowski_loss_gradient(theta_k, X, w, eps=1e-5):
     """ Riemannian gradient of error function w.r.t theta_k """
     # X : ALL data x1, ..., xN (not just within clusters like K-means) - shape N x 1
     # theta_k: point in hyperboloid at cluster center
@@ -30,7 +30,8 @@ def minkowski_loss_gradient(theta_k, X, w):
     # returns gradient vector
     weighted_distances = w*np.array([-1*hyperboloid_dist(theta_k, x) for x in X]) # scalar
     distance_grads = np.array([minkowski_distance_gradient(theta_k, x) for x in X]) # list of vectors
-    grad_loss = 2*np.sum(weighted_distances*distance_grads, axis=0) # summing along list of vectors
+    grad_loss = np.array([weighted_distances[i]*distance_grads[i] for i in range(len(weighted_distances))]) # summing along list of vectors
+    grad_loss = 2*np.sum(grad_loss, axis=0)
     if np.isnan(grad_loss).any():
         #print('Hyperboloid dist returned nan value')
         return eps
@@ -55,7 +56,7 @@ def update_step(theta_k, hyperboloid_grad, alpha=0.1):
     # hyperboloid_grad: hyperboloid gradient in tangent space
     # alpha: learning rate > 0
     new_theta_k = exp_map(-1*alpha*hyperboloid_grad, theta_k)
-    return 
+    return new_theta_k
 
 def barycenter_loss(theta_k, X, w):
     """ Evaluate barycenter loss for a given gaussian cluster """
@@ -80,7 +81,7 @@ def overall_loss(theta, X, W):
         loss += np.sum(weighted_distances)
     return loss
 
-def weighted_barycenter(theta_k, X, w, num_rounds = 10, alpha=0.3, tol = 1e-4, verbose=False):
+def weighted_barycenter(theta_k, X, w, num_rounds = 20, alpha=5, tol = 1e-8, verbose=False):
     """ Estimate weighted barycenter for a gaussian cluster with optimization routine """
     # X : ALL data x1, ..., xN (not just within clusters like K-means) - shape N x 1
     # theta_k: parameter matrix with cluster center points - k x n
