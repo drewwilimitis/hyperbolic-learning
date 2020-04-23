@@ -1,9 +1,12 @@
 # import libraries
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import sys
-my_path = 'C:\\Users\\dreww\\Desktop\\hyperbolic-learning\\utils' # path to utils.py 
-sys.path.append(my_path)
+import os
+
+# import modules within repository
+sys.path.append('C:\\Users\\dreww\\Desktop\\hyperbolic-learning\\utils') # path to utils folder
 from utils import *
 
 #-------------------------------------------------------------------
@@ -22,7 +25,7 @@ def minkowski_distance_gradient(u, v):
     # u,v in hyperboloid
     return -1*(hyperboloid_dot(u,v)**2 - 1)**-1/2 * v
 
-def minkowski_loss_gradient(theta_k, X, w, eps=1e-6):
+def minkowski_loss_gradient(theta_k, X, w):
     """ Riemannian gradient of error function w.r.t theta_k """
     # X : ALL data x1, ..., xN (not just within clusters like K-means) - shape N x 1
     # theta_k: point in hyperboloid at cluster center
@@ -55,7 +58,7 @@ def update_step(theta_k, hyperboloid_grad, alpha=0.1):
     # hyperboloid_grad: hyperboloid gradient in tangent space
     # alpha: learning rate > 0
     new_theta_k = exp_map(-1*alpha*hyperboloid_grad, theta_k)
-    return new_theta_k
+    return 
 
 def barycenter_loss(theta_k, X, w):
     """ Evaluate barycenter loss for a given gaussian cluster """
