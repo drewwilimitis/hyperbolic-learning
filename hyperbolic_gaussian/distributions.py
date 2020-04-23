@@ -1,6 +1,6 @@
 # import libraries
 import numpy as np
-import pandas as pd
+from scipy.stats import multivariate_normal
 import matplotlib.pyplot as plt
 import sys
 import os
@@ -9,101 +9,69 @@ import os
 sys.path.append('C:\\Users\\dreww\\Desktop\\hyperbolic-learning\\utils') # path to utils folder
 from utils import *
 
-#-------------------------------------------------------------------
-#----- Riemannian Barycenter Optimization in Hyperboloid Model -----
-#-------------------------------------------------------------------
+#------------------------------------------------------------
+#----- Wrapped Normal Distribution in Hyperboloid Model -----
+#------------------------------------------------------------
 
-def exp_map(v, theta_k, eps=1e-6):
-    """ Exponential map that projects tangent vector v onto hyperboloid"""
-    # v: vector in tangent space at theta_k
-    # theta: parameter vector in hyperboloid with centroid coordinates
-    # project vector v from tangent minkowski space -> hyperboloid"""
-    return np.cosh(norm(v))*theta_k + np.sinh(norm(v)) * v / (norm(v) + eps)
+# first get sample from standard multivariate gaussian 
+def init_sample(dim=2, variance=None):
+    """Sample v from normal distribution in R^n+1 with N(0, sigma)"""
+    mean = np.zeros((dim))
+    if variance is None:
+        variance = np.eye(dim)
+    v = np.random.multivariate_normal(mean, variance)
+    tangent_0 = np.insert(v, 0, 0)
+    return tangent_0
 
-def minkowski_distance_gradient(u, v):
-    """ Riemannian gradient of hyperboloid distance w.r.t point u """ 
-    # u,v in hyperboloid
-    return -1*(hyperboloid_dot(u,v)**2 - 1)**-1/2 * v
+# define alternate minkowski/hyperboloid bilinear form
+def lorentz_product(u, v):
+    """Compute lorentz product with alternate minkowski/hyperboloid bilinear form"""
+    return -u[0]*v[0] + np.dot(u[1:], v[1:])
 
-def minkowski_loss_gradient(theta_k, X, w):
-    """ Riemannian gradient of error function w.r.t theta_k """
-    # X : ALL data x1, ..., xN (not just within clusters like K-means) - shape N x 1
-    # theta_k: point in hyperboloid at cluster center
-    # w: vector with weights w_1k, ..., w_Nk - shape N x 1
-    # returns gradient vector
-    weighted_distances = w*np.array([-1*hyperboloid_dist(theta_k, x) for x in X]) # scalar
-    distance_grads = np.array([minkowski_distance_gradient(theta_k, x) for x in X]) # list of vectors
-    grad_loss = 2*np.sum(weighted_distances*distance_grads, axis=0) # summing along list of vectors
-    if np.isnan(grad_loss).any():
-        #print('Hyperboloid dist returned nan value')
-        return eps
+def lorentz_norm(u, eps=1e-5):
+    """Compute norm in hyperboloid using lorentz product"""
+    return np.sqrt(np.max([lorentz_product(u,u), eps]))
+
+def parallel_transport(transport_vec, target_vec, base_vec, eps=1e-5):
+    """Mapping between tangent spaces, transports vector along geodesic from v to u""" 
+    alpha = -lorentz_product(base_vec, target_vec)
+    frac = lorentz_product(target_vec - alpha*base_vec, transport_vec) / (alpha+1+eps)
+    return transport_vec + frac*(base_vec + target_vec)
+
+def exponential_map(u, mu):
+    """Given v in tangent space of u, we project v onto the hyperboloid surface""" 
+    first = np.cosh(lorentz_norm(u)) * mu 
+    last = np.sinh(lorentz_norm(u)) * (u / lorentz_norm(u))
+    return first + last
+
+def logarithm_map(z, mu, eps=1e-5):
+    """Given z in hyperboloid, we project z onto the tangent space at mu""" 
+    alpha = -lorentz_product(mu, z)
+    numer = np.arccosh(alpha) * (z - alpha*mu) 
+    denom = np.sqrt(max(alpha**2 - 1, eps))
+    return numer / denom
+
+def hyperbolic_sampling(n_samples, mean, sigma, dim=2, poincare=False):
+    """Generate n_samples from the wrapped normal distribution in hyperbolic space"""
+    data = []
+    mu_0 = np.insert(np.zeros((dim)), 0, 1) 
+    for i in range(n_samples):
+        init_v = init_sample(dim=dim, variance=sigma)
+        tangent_u = parallel_transport(base_vec=mu_0, target_vec=mean, transport_vec=init_v)
+        data.append(exponential_map(tangent_u, mean))
+    data = np.array(data)
+    if poincare:
+        return hyperboloid_pts_to_poincare(data, metric='minkowski')
     else:
-        return grad_loss
+        return data
 
-def project_to_tangent(theta_k, minkowski_grad):
-    """ 
-    Projects vector in ambient space to hyperboloid tangent space at theta_k 
-    Note: returns our hyperboloid gradient of the error function w.r.t theta_k
-    """
-    # minkowski_grad: riemannian gradient vector in ambient space
-    # theta_k: point in hyperboloid at cluster center
-    return minkowski_grad + hyperboloid_dot(theta_k, minkowski_grad)*theta_k
-
-def update_step(theta_k, hyperboloid_grad, alpha=0.1):
-    """ 
-    Apply exponential map to project the gradient and obtain new cluster center
-    Note: returns updated theta_k
-    """
-    # theta_k: point in hyperboloid at cluster center
-    # hyperboloid_grad: hyperboloid gradient in tangent space
-    # alpha: learning rate > 0
-    new_theta_k = exp_map(-1*alpha*hyperboloid_grad, theta_k)
-    return 
-
-def barycenter_loss(theta_k, X, w):
-    """ Evaluate barycenter loss for a given gaussian cluster """
-    # X : ALL data x1, ..., xN (not just within clusters like K-means) - shape N x 1
-    # theta_k: parameter matrix with cluster center points - 1 x n
-    # w: weights w_1k, ..., w_Nk - shape N x 1
-    distances = np.array([hyperboloid_dist(theta_k, x)**2 for x in X])
-    weighted_distances = w * distances
-    loss = np.sum(weighted_distances)
-    return loss
-
-def overall_loss(theta, X, W):
-    """ Evaluate barycenter loss for a given gaussian cluster """
-    # X : ALL data x1, ..., xN (not just within clusters like K-means) - shape N x 1
-    # theta: parameter matrix with cluster center points - k x n
-    # W: matrix with weights w_1k, ..., w_Nk - shape k x N
-    loss = 0
-    K = W.shape[1]
-    for i in range(K):
-        distances = np.array([hyperboloid_dist(theta[i], x)**2 for x in X])
-        weighted_distances = W[i, :] * distances
-        loss += np.sum(weighted_distances)
-    return loss
-
-def weighted_barycenter(theta_k, X, w, num_rounds = 10, alpha=0.3, tol = 1e-4, verbose=False):
-    """ Estimate weighted barycenter for a gaussian cluster with optimization routine """
-    # X : ALL data x1, ..., xN (not just within clusters like K-means) - shape N x 1
-    # theta_k: parameter matrix with cluster center points - k x n
-    # w: weights w_1k, ..., w_Nk - shape N X 1
-    # num_rounds: training iterations
-    # alpha: learning rate
-    # tol: convergence tolerance, exit if updates smaller than tolerance
-    centr_pt = theta_k
-    centr_pts = [theta_k]
-    losses = []
-    for i in range(num_rounds):
-        gradient_loss = minkowski_loss_gradient(centr_pt, X, w)
-        tangent_grad = project_to_tangent(centr_pt, -gradient_loss)
-        centr_pt = update_step(centr_pt, tangent_grad, alpha=alpha)
-        centr_pts.append(centr_pt)
-        losses.append(barycenter_loss(centr_pt, X, w))
-        if verbose:
-            print('Epoch ' + str(i+1) + ' complete')
-            print('Loss: ', barycenter_loss(centr_pt, X, w))
-            print('\n')
-        if hyperboloid_dist(centr_pts[i+1], centr_pts[i]) < tol:
-            break
-    return centr_pt
+def log_pdf(z, mu, sigma):
+    """Given sample z and parameters mu, sigma calculate log of p.d.f(z)""" 
+    n = len(z) - 1
+    mu_0 = np.insert(np.zeros((n)), 0, 1)
+    u = logarithm_map(z, mu)
+    v = parallel_transport(transport_vec=u, target_vec=mu_0, base_vec=mu)
+    r = lorentz_norm(u)
+    det_proj = (np.sinh(r) / r)**(n-1)
+    pv = multivariate_normal.pdf(v[1:], mean=np.zeros((n)), cov=sigma)
+    return np.log10(pv) - np.log10(det_proj)
