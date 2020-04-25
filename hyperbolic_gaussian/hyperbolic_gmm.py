@@ -28,14 +28,18 @@ class HyperbolicGMM():
         self.n_clusters = n_clusters
         self.verbose = verbose
         
-    def init_params(self, X=None, radius=0.15, method='random_sample'):
+    def init_params(self, X=None, radius=0.35, method='random'):
         """ Initialize parameter configurations that define gaussian clusters
         Options: 
             1.) Randomly sample points around small uniform ball
             2.) Set cluster center at randomly chosen data points
             3.) Initialize with K-Means clustering (not implemented here)
         """
-        if method == 'random_sample':
+        if method == 'select' and X is not None:
+            indices = np.random.randint(0, self.n_samples, self.n_clusters)
+            self.means = X[indices]
+            
+        else:
             theta = np.random.uniform(0, 2*np.pi, self.n_clusters)
             u = np.random.uniform(0, radius, self.n_clusters)
             r = np.sqrt(u)
@@ -43,10 +47,6 @@ class HyperbolicGMM():
             y = r * np.sin(theta)
             centers = np.hstack((x.reshape(-1,1), y.reshape(-1,1)))
             self.means = poincare_pts_to_hyperboloid(centers, metric='minkowski')
-            
-        elif method == 'select_points' and X is not None:
-            indices = np.random.randint(0, self.n_samples, self.n_clusters)
-            self.means = poincare_pts_to_hyperboloid(X[indices], metric='minkowski')
             
         # methods exist to initialize variances but I use unit variance here
         self.variances = np.tile([1, 1], self.n_clusters).reshape((self.n_clusters, 2))
@@ -63,7 +63,7 @@ class HyperbolicGMM():
         W = np.zeros((self.n_samples, self.n_clusters))
         for i in range(self.n_samples):
             for j in range(self.n_clusters):
-                W[i, j] = self.cluster_weights[j] * log_pdf(z=X[i], mu=self.means[j], sigma=self.variances[j])
+                W[i, j] = self.cluster_weights[j] * np.exp((log_pdf(z=X[i], mu=self.means[j], sigma=self.variances[j])))
             # divide by row sum to normalize assignment probabilities
             row_sum = W[i, :].sum()
             W[i, :] = W[i, :] / row_sum
@@ -85,9 +85,9 @@ class HyperbolicGMM():
         train_means = []
         for i in range(self.n_clusters):
             new_mean = weighted_barycenter(self.means[i], X, self.likelihoods[:, i], num_rounds = num_rounds, alpha=alpha, tol=tol)
-            self.means[i] = new_mean
             train_means.append(new_mean)
-        return train_means
+        self.means = np.array(train_means)
+        
         
     #-----------------------------------------------------------------------------
     #------------------------ TRAINING ROUTINE -----------------------------------
@@ -103,7 +103,7 @@ class HyperbolicGMM():
             loss += np.sum(weighted_distances)
         self.loss = loss
             
-    def fit(self, X, y=None, max_epochs=40, alpha=0.3, metrics=False, verbose=False):
+    def fit(self, X, y=None, max_epochs=40, alpha=0.3, metrics=False, verbose=False, init_means='random'):
         """
         Fit K gaussian distributed clusters to data, return cluster assignments by max likelihood 
         Parameters
@@ -120,9 +120,11 @@ class HyperbolicGMM():
         
         # initialize gaussian mixture parameters
         self.n_samples = X.shape[0]
-        self.init_params()
+        self.init_params(X, method=init_means)
         if metrics:
-            train_vals = []
+            train_means = []
+            train_ll = []
+            train_losses = []
         # initialize assignments as the most likely cluster for each xi
         self.assignments = np.zeros((self.n_samples, self.n_clusters))
         
@@ -131,15 +133,19 @@ class HyperbolicGMM():
 
             # update likelihoods given new parameters
             self.update_likelihoods(X)
-
-            # update parameters given likelihoods
             self.update_cluster_weights()
-            train_means = self.update_means(X, num_rounds=10, alpha=alpha, tol = 1e-8)
-            train_vals.append(train_means)
+            # update parameters given likelihoods
+            self.update_means(X, num_rounds=10, alpha=alpha, tol = 1e-8)
+            self.loss_fn(X)
+            if metrics:
+                train_means.append(self.means)
+                train_ll.append(self.likelihoods)
+                train_losses.append(self.loss)
             if verbose:
-                self.loss_fn(X)
                 print('---- Epoch ' + str(j) + ' complete ---- Loss: ' + str(self.loss))
-            
+
+        # assign final probabilities and make assignments
+        self.update_likelihoods(X)
         for i in range(self.n_samples):
             # zero out current cluster assignment
             self.assignments[i, :] = np.zeros((1, self.n_clusters))
@@ -149,4 +155,8 @@ class HyperbolicGMM():
                 
         self.labels = np.argmax(self.likelihoods, axis=1)
         self.loss_fn(X)
-        return train_vals
+        if metrics:
+            self.train_metrics = {'means': np.array(train_means),
+                                  'likelihoods': np.array(train_ll),
+                                  'losses': np.array(train_losses)}
+                                  
