@@ -35,7 +35,7 @@ def minkowski_loss_gradient(theta_k, X, w, eps=1e-5):
     if np.isnan(grad_loss).any():
         #print('Hyperboloid dist returned nan value')
         print('Error: Minkowski Loss Gradient returned NaN value')
-        return eps
+        return np.array([eps, eps, eps])
     else:
         return grad_loss
 
@@ -82,7 +82,7 @@ def overall_loss(theta, X, W):
         loss += np.sum(weighted_distances)
     return loss
 
-def weighted_barycenter(theta_k, X, w, num_rounds = 10, alpha=0.3, tol = 1e-4, verbose=False):
+def weighted_barycenter(theta_k, X, w, num_rounds = 10, alpha=0.3, tol = 1e-8, verbose=False):
     """ Estimate weighted barycenter for a gaussian cluster with optimization routine """
     # X : ALL data x1, ..., xN (not just within clusters like K-means) - shape N x 1
     # theta_k: parameter matrix with cluster center points - k x n
