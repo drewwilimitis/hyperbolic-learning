@@ -36,7 +36,7 @@ def minkowski_loss_gradient(theta_k, X, w, eps=1e-5):
     weighted_distances = w*np.array([-1*hyperboloid_dist(theta_k, x, metric='minkowski') for x in X]) # scalars
     distance_grads = np.array([minkowski_distance_gradient(theta_k, x) for x in X]) # list of vectors
     grad_loss = np.array([weighted_distances[i]*distance_grads[i] for i in range(len(weighted_distances))]) # list of vectors
-    grad_loss = 2*np.sum(grad_loss, axis=0) * (0.5*len(X))# vector
+    grad_loss = 2*np.sum(grad_loss, axis=0) # vector
     #grad_loss = grad_loss / np.max(grad_loss)
     if np.isnan(grad_loss).any():
         return np.array([eps, eps, eps])

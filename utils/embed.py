@@ -67,12 +67,12 @@ def load_embeddings(file_path, delim=' '):
 def evaluate_model(model, X, y, max_epochs=10, cv=5, report=True, classifier='hkmeans', scorer='f1', alpha=None):
     # print classification report with other metrics
     if report:
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
         if classifier == 'hsvm':
             model.fit(poincare_pts_to_hyperboloid(X_train, metric='minkowski'), y_train)
             y_pred = model.predict(poincare_pts_to_hyperboloid(X_test, metric='minkowski'))
         elif classifier == 'hgmm':
-            model.fit(poincare_pts_to_hyperboloid(X_train, metric='minkowski'), y_train, alpha=alpha)
+            model.fit(poincare_pts_to_hyperboloid(X_train, metric='minkowski'), y_train, max_epochs=max_epochs, alpha=alpha)
             y_pred = model.predict(poincare_pts_to_hyperboloid(X_test, metric='minkowski'))
         else:
             model.fit(X_train, y_train, max_epochs=max_epochs)
@@ -87,7 +87,7 @@ def evaluate_model(model, X, y, max_epochs=10, cv=5, report=True, classifier='hk
             model.fit(poincare_pts_to_hyperboloid(X[train], metric='minkowski'), y[train])
             y_pred = model.predict(poincare_pts_to_hyperboloid(X[test], metric='minkowski'))
         elif classifier == 'hgmm':
-            model.fit(poincare_pts_to_hyperboloid(X[train], metric='minkowski'), y[train], alpha=alpha)
+            model.fit(poincare_pts_to_hyperboloid(X[train], metric='minkowski'), y[train], max_epochs=max_epochs, alpha=alpha)
             y_pred = model.predict(poincare_pts_to_hyperboloid(X[test], metric='minkowski'))
         else:
             model.fit(X[train], y[train], max_epochs=max_epochs)
