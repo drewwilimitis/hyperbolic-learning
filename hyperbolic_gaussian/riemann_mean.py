@@ -36,10 +36,9 @@ def minkowski_loss_gradient(theta_k, X, w, eps=1e-5):
     weighted_distances = w*np.array([-1*hyperboloid_dist(theta_k, x, metric='minkowski') for x in X]) # scalars
     distance_grads = np.array([minkowski_distance_gradient(theta_k, x) for x in X]) # list of vectors
     grad_loss = np.array([weighted_distances[i]*distance_grads[i] for i in range(len(weighted_distances))]) # list of vectors
-    grad_loss = 2*np.sum(grad_loss, axis=0) # vector
+    grad_loss = 2*np.sum(grad_loss, axis=0) * (0.5*len(X))# vector
     #grad_loss = grad_loss / np.max(grad_loss)
     if np.isnan(grad_loss).any():
-        print('Error: Minkowski Loss Gradient returned NaN value')
         return np.array([eps, eps, eps])
     else:
         return grad_loss
@@ -101,7 +100,12 @@ def weighted_barycenter(theta_k, X, w, num_rounds = 10, alpha=0.3, tol = 1e-8, v
     for i in range(num_rounds):
         gradient_loss = minkowski_loss_gradient(centr_pt, X, w)
         tangent_grad = project_to_tangent(centr_pt, -gradient_loss)
-        centr_pt = update_step(centr_pt, tangent_grad, alpha=alpha)
+        new_centr = update_step(centr_pt, tangent_grad, alpha=alpha)
+        if np.isnan(new_centr).any() or np.isinf(new_centr).any():
+            new_centr = update_step(centr_pt, tangent_grad, alpha=alpha/10)
+            if np.isnan(new_centr).any() or np.isinf(new_centr).any():
+                break
+        centr_pt = new_centr
         centr_pts.append(centr_pt)
         losses.append(barycenter_loss(centr_pt, X, w))
         if verbose:

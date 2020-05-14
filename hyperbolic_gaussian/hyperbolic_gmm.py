@@ -28,7 +28,7 @@ class HyperbolicGMM():
         self.n_clusters = n_clusters
         self.verbose = verbose
         
-    def init_params(self, X=None, radius=0.35, method='random'):
+    def init_params(self, X=None, radius=0.15, method='random'):
         """ Initialize parameter configurations that define gaussian clusters
         Options: 
             1.) Randomly sample points around small uniform ball
@@ -98,9 +98,9 @@ class HyperbolicGMM():
         """ Wrapper for auxilliary function to compute total barycenter loss """
         loss = 0
         for i in range(self.n_clusters):
-            distances = np.array([hyperboloid_dist(self.means[i], x, metric='minkowski')**2 for x in X])
+            distances = np.array([hyperboloid_dist(-self.means[i], x, metric='minkowski')**2 for x in X])
             weighted_distances = self.likelihoods[:, i] * distances
-            loss += np.sum(weighted_distances)
+            loss += np.sum(weighted_distances / np.max(weighted_distances))
         self.loss = loss
             
     def fit(self, X, y=None, max_epochs=40, alpha=0.3, metrics=False, verbose=False, init_means='random'):
@@ -125,12 +125,16 @@ class HyperbolicGMM():
             train_means = []
             train_ll = []
             train_losses = []
+            
         # initialize assignments as the most likely cluster for each xi
         self.assignments = np.zeros((self.n_samples, self.n_clusters))
-        
+        if verbose:
+            self.update_likelihoods(X)
+            self.loss_fn(X)
+            print('Initial Loss: ' + str(self.loss))
+            
         # loop through the expectation and maximization steps
         for j in range(max_epochs):
-
             # update likelihoods given new parameters
             self.update_likelihoods(X)
             self.update_cluster_weights()
