@@ -30,7 +30,8 @@
 
 ![hsvm_decision_boundaries](https://user-images.githubusercontent.com/16658498/69854243-39852e80-124e-11ea-97aa-d8d34ba107d8.png)
 
-* __Hyperbolic Gaussian Mixture Models__ - [nbviewer](https://nbviewer.jupyter.org/github/drewwilimitis/hyperbolic-learning/blob/master/hyperbolic_svm/hyperbolic_svm_results.ipynb)
+
+* __Hyperbolic Gaussian Mixture Models__ - [nbviewer](https://nbviewer.jupyter.org/github/drewwilimitis/hyperbolic-learning/blob/master/hyperbolic_gaussian/hyperbolic_gaussian.ipynb)
   - Iterative Expectation-Maximization (EM) algorithm used for clustering __[6]__.
   - Wrapped normal distribution based on using parallel transport to map to hyperboloid
 
