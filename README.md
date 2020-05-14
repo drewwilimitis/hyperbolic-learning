@@ -32,6 +32,7 @@
 
 
 * __Hyperbolic Gaussian Mixture Models__ - [nbviewer](https://nbviewer.jupyter.org/github/drewwilimitis/hyperbolic-learning/blob/master/hyperbolic_gaussian/hyperbolic_gaussian.ipynb)
+
   - Iterative Expectation-Maximization (EM) algorithm used for clustering __[6]__.
   - Wrapped normal distribution based on using parallel transport to map to hyperboloid
 
