@@ -4,7 +4,9 @@ import sys
 
 # import modules within repository
 sys.path.append('C:\\Users\\dreww\\Desktop\\hyperbolic-learning\\utils') # path to utils folder
+sys.path.append('C:\\Users\\dreww\\Desktop\\hyperbolic-learning\\hyperbolic_gaussian')
 from utils import *
+from distributions import *
 
 #-------------------------------------------------------------------
 #----- Riemannian Barycenter Optimization in Hyperboloid Model -----
@@ -17,10 +19,13 @@ def exp_map(v, theta_k, eps=1e-6):
     # project vector v from tangent minkowski space -> hyperboloid"""
     return np.cosh(norm(v))*theta_k + np.sinh(norm(v)) * v / (norm(v) + eps)
 
-def minkowski_distance_gradient(u, v):
+def minkowski_distance_gradient(u, v, eps=1e-5):
     """ Riemannian gradient of hyperboloid distance w.r.t point u """ 
     # u,v in hyperboloid
-    return -1*(minkowski_dot(u,v)**2 - 1)**-1/2 * v
+    dot = np.sqrt(minkowski_dot(u,v)**2 - 1)
+    if np.isnan(dot):
+        dot = eps
+    return -1*dot * v
 
 def minkowski_loss_gradient(theta_k, X, w, eps=1e-5):
     """ Riemannian gradient of error function w.r.t theta_k """
@@ -32,8 +37,8 @@ def minkowski_loss_gradient(theta_k, X, w, eps=1e-5):
     distance_grads = np.array([minkowski_distance_gradient(theta_k, x) for x in X]) # list of vectors
     grad_loss = np.array([weighted_distances[i]*distance_grads[i] for i in range(len(weighted_distances))]) # list of vectors
     grad_loss = 2*np.sum(grad_loss, axis=0) # vector
+    #grad_loss = grad_loss / np.max(grad_loss)
     if np.isnan(grad_loss).any():
-        #print('Hyperboloid dist returned nan value')
         print('Error: Minkowski Loss Gradient returned NaN value')
         return np.array([eps, eps, eps])
     else:

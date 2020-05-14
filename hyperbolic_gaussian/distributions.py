@@ -26,7 +26,7 @@ def init_sample(dim=2, variance=None):
 # define alternate minkowski/hyperboloid bilinear form
 def lorentz_product(u, v):
     """Compute lorentz product with alternate minkowski/hyperboloid bilinear form"""
-    return -u[0]*v[0] + np.dot(u[1:], v[1:])
+    return -minkowski_dot(u, v)
 
 def lorentz_norm(u, eps=1e-5):
     """Compute norm in hyperboloid using lorentz product"""
