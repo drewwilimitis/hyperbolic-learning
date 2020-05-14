@@ -41,6 +41,7 @@
 
   
 * __Embedding Graphs in Lorentzian Spacetime__ -  [nbviewer](https://nbviewer.jupyter.org/github/drewwilimitis/hyperbolic-learning/blob/master/spacetime_graph_embeddings/spacetime_embedding_results.ipynb)
+
   - An algorithm based on notions of causality in the Minkowski spacetime formulation of special relativity __[7]__.
   - Used to embed directed acyclic graphs where nodes are represented by space-like and time-like coordinates. 
 
