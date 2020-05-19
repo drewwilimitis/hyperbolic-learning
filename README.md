@@ -51,6 +51,7 @@
 * __Application: fMRI Schizophrenia Classification__ -  [nbviewer](https://nbviewer.jupyter.org/github/drewwilimitis/hyperbolic-learning/blob/master/applications/brain_connectome/fMRI_schizophrenia.ipynb)
 
   - Deriving hyperbolic features from functional network connectomes and predicting schizophrenia.
+  - Analyzing discriminating factors from coalescent embeddings and hyperbolic kmeans clustering
   
 ![fmri_image](https://user-images.githubusercontent.com/16658498/81888310-b68b3280-9566-11ea-9a7a-b79e6fb2efdf.png)
 
