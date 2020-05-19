@@ -48,7 +48,7 @@
 ![hep-th_citation_network](https://user-images.githubusercontent.com/16658498/65956193-6fa16000-e40f-11e9-935b-a518a77b6525.png)
 
 
-* __Application: fMRI Schizophrenia Classification__ -  [nbviewer](https://nbviewer.jupyter.org/github/drewwilimitis/hyperbolic-learning/blob/master/spacetime_graph_embeddings/spacetime_embedding_results.ipynb)
+* __Application: fMRI Schizophrenia Classification__ -  [nbviewer](https://nbviewer.jupyter.org/github/drewwilimitis/hyperbolic-learning/blob/master/applications/brain_connectome/fMRI_schizophrenia.ipynb)
 
   - Deriving hyperbolic features from functional network connectomes and predicting schizophrenia.
   
